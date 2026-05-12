@@ -764,6 +764,7 @@ let S = {
   forceLocked: false, // admin override: force all matches locked regardless of date
   picksLockMode: 'firstmatch', // 'firstmatch' | 'deadline'
   picksLockDeadline: '', // ISO datetime string for long-term picks deadline
+  finalResults: {},  // {champ, vice, third, fourth} — admin-set final standings
   currentUser: null,
 };
 
@@ -801,7 +802,7 @@ const SHARED_DOC = () => DB.collection('bolao').doc('shared');
 const USER_DOC   = uid => DB.collection('bolao').doc('user_' + uid);
 
 // Shared state fields (admin writes, everyone reads)
-const SHARED_FIELDS = ['users','matchMeta','koTeams','slotNames','scoring','revealed','revealDeadline','realScores','flags','lockMode','globalLockDeadline','forceLocked','picksLockMode','picksLockDeadline'];
+const SHARED_FIELDS = ['users','matchMeta','koTeams','slotNames','scoring','revealed','revealDeadline','realScores','flags','lockMode','globalLockDeadline','forceLocked','picksLockMode','picksLockDeadline','finalResults'];
 
 // Per-user fields
 const USER_FIELDS = ['bets','classes','koPicks','champPicks'];
@@ -819,6 +820,7 @@ async function persist(){
     shared.forceLocked = S.forceLocked||false;
     shared.picksLockMode = S.picksLockMode||'firstmatch';
     shared.picksLockDeadline = S.picksLockDeadline||'';
+    shared.finalResults = S.finalResults||{};
 
     if(S.currentUser && S.currentUser.isAdmin){
       await SHARED_DOC().set(shared, {merge:true});
@@ -1005,11 +1007,18 @@ function totalPts(uid){
     }
   });
 
-  // Champ picks
-  const champReal = S.champPicks['admin_real'] || {}; // admin sets real results
-  // Actually champ pts come from real scores of final/tp
-  // For now: these are scored manually when admin reveals
-  // (placeholder — will expand when final logic is defined)
+  // Champ picks scoring
+  const fr=S.finalResults||{};
+  if(Object.keys(fr).length>0){
+    const champPk=S.champPicks[uid]||{};
+    const champMap={champ:'champ',vice:'vice',third:'third',fourth:'fourth'};
+    const scoreMap={champ:S.scoring.champ,vice:S.scoring.vice,third:S.scoring.third,fourth:S.scoring.fourth};
+    Object.entries(champMap).forEach(([pos,key])=>{
+      if(fr[pos]&&champPk[key]&&fr[pos].trim().toLowerCase()===champPk[key].trim().toLowerCase()){
+        p+=scoreMap[pos]||0;
+      }
+    });
+  }
 
   return p;
 }
@@ -2023,15 +2032,21 @@ function buildChampBetsPanel(){
     {key:'fourth',label:'4º'},
   ];
   let html='';
+  const fr=S.finalResults||{};
+  const hasFr=Object.keys(fr).length>0;
   slots.forEach(function(s){
     const tally={};
     const voterMap={};
+    const ptsMap={};
     participants.forEach(function(u){
       const pick=(S.champPicks[u.id]||{})[s.key];
       if(!pick) return;
       tally[pick]=(tally[pick]||0)+1;
       if(!voterMap[pick]) voterMap[pick]=[];
-      voterMap[pick].push(u.name);
+      // Check if this pick matches the real result
+      const slotPts=(hasFr&&fr[s.key]&&fr[s.key].trim().toLowerCase()===pick.trim().toLowerCase())?S.scoring[s.key]:null;
+      voterMap[pick].push({name:u.name, pts:slotPts});
+      ptsMap[pick]=slotPts;
     });
     const sorted=Object.entries(tally).sort(function(a,b){return b[1]-a[1];});
     if(!sorted.length) return;
@@ -2042,17 +2057,23 @@ function buildChampBetsPanel(){
       const team=entry[0], count=entry[1];
       const code=Object.keys(TEAMS).find(function(k){return TN(k)===team;});
       const flagHtml=code?FE(code):'<span style="font-size:16px">🏳</span>';
+      const slotPts=ptsMap[team];
+      const isCorrect=slotPts!=null;
       const panelId='cbp_'+s.key+'_'+(code||team).replace(/[^a-zA-Z0-9]/g,'_');
-      html+='<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:120px">';
+      html+='<div style="background:var(--bg-card);border:1px solid '+(isCorrect?'var(--green-light)':'var(--border)')+';border-radius:8px;padding:8px 12px;min-width:120px">';
       html+='<div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;cursor:pointer" onclick="togglePickPanel(\''+panelId+'\',this)">';
       html+='<div class="team-flag-wrap" style="flex-shrink:0">'+flagHtml+'</div>';
       html+='<span>'+team+'</span>';
       html+='<span style="color:var(--gold);font-family:Bebas Neue,sans-serif;font-size:18px;margin-left:auto">'+count+'</span>';
+      if(isCorrect) html+='<span style="color:var(--green-light);font-size:11px;font-weight:700;margin-left:4px">+'+slotPts+'pts</span>';
       html+='<span style="color:var(--text-muted);font-size:10px;margin-left:4px">▼</span>';
       html+='</div>';
       html+='<div id="'+panelId+'" style="display:none;margin-top:6px;border-top:1px solid var(--border);padding-top:6px">';
-      (voterMap[team]||[]).forEach(function(n){
-        html+='<div style="font-size:11px;color:var(--text-secondary);padding:1px 0">• '+n+'</div>';
+      (voterMap[team]||[]).forEach(function(v){
+        html+='<div style="font-size:11px;color:var(--text-secondary);padding:1px 0;display:flex;justify-content:space-between">';
+        html+='<span>• '+v.name+'</span>';
+        if(v.pts!=null) html+='<span style="color:var(--green-light);font-weight:700">+'+v.pts+'pts</span>';
+        html+='</div>';
       });
       html+='</div>';
       html+='</div>';
@@ -2131,11 +2152,38 @@ function renderAdminParticipants(){
 // ============================================================
 function renderAdminMatchesList(activePhase){
   const allPhases=[...new Set(MATCHES.map(m=>m.phase))];
+  const allTabs=[...allPhases,'1º/2º/3º/4º'];
   const phase=activePhase||allPhases[0];
   const tabsEl=document.getElementById('admin-phase-tabs');
-  tabsEl.innerHTML=allPhases.map(p=>`
+  tabsEl.innerHTML=allTabs.map(p=>`
     <button class="section-tab${p===phase?' active':''}" onclick="renderAdminMatchesList('${p}'); this.parentNode.querySelectorAll('.section-tab').forEach(b=>b.classList.remove('active')); this.classList.add('active')">${p}</button>
   `).join('');
+
+  // Special tab: final results
+  if(phase==='1º/2º/3º/4º'){
+    const fr=S.finalResults||{};
+    const allTeamOpts=Object.keys(TEAMS).sort((a,b)=>TN(a).localeCompare(TN(b)));
+    function opts(key){ return allTeamOpts.map(c=>`<option value="${TN(c)}"${fr[key]===TN(c)?' selected':''}>${TN(c)}</option>`).join(''); }
+    document.getElementById('admin-matches-list').innerHTML=`
+      <div style="padding:16px 0">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Defina os classificados finais do torneio. Isso contabiliza os pontos de Campeão, Vice, 3º e 4º de cada participante.</div>
+        ${[
+          {key:'champ', label:'🥇 Campeão'},
+          {key:'vice',  label:'🥈 Vice-Campeão'},
+          {key:'third', label:'🥉 3º Colocado'},
+          {key:'fourth',label:'4️⃣ 4º Colocado'},
+        ].map(s=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:13px;min-width:130px;color:var(--text-primary)">${s.label}</span>
+          <select class="admin-input" id="fr_${s.key}" style="flex:1;max-width:220px;padding:4px 8px;font-size:12px">
+            <option value="">— Selecionar —</option>${opts(s.key)}
+          </select>
+        </div>`).join('')}
+        <button class="admin-save-match" style="margin-top:8px" onclick="saveFinalResults()">💾 Salvar Classificação Final</button>
+        <div id="fr-status" style="font-size:12px;color:var(--text-muted);margin-top:8px"></div>
+      </div>`;
+    return;
+  }
 
   const ms=MATCHES.filter(m=>m.phase===phase);
   document.getElementById('admin-matches-list').innerHTML=ms.map(m=>{
@@ -2190,6 +2238,26 @@ function saveMatchMeta(mid){
   persist();
   renderMatches();
   showToast('Data e hora salvos!','success');
+}
+
+function saveFinalResults(){
+  const fr={};
+  ['champ','vice','third','fourth'].forEach(k=>{
+    const el=document.getElementById('fr_'+k);
+    if(el&&el.value) fr[k]=el.value;
+  });
+  // Validate no duplicates
+  const vals=Object.values(fr).filter(Boolean);
+  if(new Set(vals).size!==vals.length){ showToast('Não pode ter o mesmo time em duas posições!','error'); return; }
+  S.finalResults=fr;
+  persist()
+    .then(()=>{
+      renderRanking();
+      const el=document.getElementById('fr-status');
+      if(el) el.textContent='✅ Classificação salva!';
+      showToast('Classificação final salva!','success');
+    })
+    .catch(()=>showToast('❌ Erro ao salvar','error'));
 }
 
 function saveRealScore(mid){
