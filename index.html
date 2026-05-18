@@ -7,21 +7,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-primary: #0a1a0f;
-  --bg-secondary: #0f2318;
-  --bg-card: #122a1a;
-  --bg-card2: #163320;
-  --gold: #f0c040;
-  --gold-dark: #c89a20;
-  --gold-light: #fad060;
-  --green: #1a5c2a;
-  --green-light: #22a84a;
-  --green-dim: #2a4a30;
-  --text-primary: #f0ead0;
-  --text-secondary: #a0b090;
-  --text-muted: #607060;
-  --border: #1e3a25;
-  --border-gold: #604010;
+  --bg-primary: #c2e8cc;
+  --bg-secondary: #1a5c2a;
+  --bg-card: #dff5e7;
+  --bg-card2: #d0f0dc;
+  --gold: #ffd700;
+  --gold-dark: #ccac00;
+  --gold-light: #ffe033;
+  --green: #2e7d32;
+  --green-light: #388e3c;
+  --green-dim: #a5d6a7;
+  --red: #c62828;
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-muted: #888880;
+  --border: #d8d4cc;
+  --border-gold: #c8a84a;
   --red: #c02020;
   --radius: 12px;
   --radius-sm: 8px;
@@ -43,7 +44,7 @@ body { overflow-x: hidden; }
   display: none;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 50% 0%, #1a4a20 0%, #0a1a0f 60%);
+  background: radial-gradient(ellipse at 50% 0%, #c8f0d8 0%, #dff5e7 60%);
   position: relative;
   overflow: hidden;
 }
@@ -68,27 +69,27 @@ body { overflow-x: hidden; }
 .login-subtitle { font-size: 12px; color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-top: 6px; margin-bottom: 32px; }
 .login-form { display: flex; flex-direction: column; gap: 16px; }
 .login-field label { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-.login-field input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; color: var(--text-primary); font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.2s; outline: none; }
+.login-field input { width: 100%; background: rgba(0,0,0,0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; color: var(--text-primary); font-size: 15px; font-family: 'Inter', sans-serif; transition: border-color 0.2s; outline: none; }
 .login-field input:focus { border-color: var(--gold-dark); }
-.login-btn { background: linear-gradient(135deg, #c89a20, #f0c040); border: none; border-radius: var(--radius-sm); padding: 14px; color: #1a0f00; font-weight: 700; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 8px; transition: opacity 0.2s, transform 0.1s; }
+.login-btn { background: linear-gradient(135deg, #8b6508, #b8860b); border: none; border-radius: var(--radius-sm); padding: 14px; color: #ffffff; font-weight: 700; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 8px; transition: opacity 0.2s, transform 0.1s; }
 .login-btn:hover { opacity: 0.9; }
 .login-btn:active { transform: scale(0.98); }
-.login-error { color: #ff6060; font-size: 13px; text-align: center; min-height: 20px; }
+.login-error { color: #c0392b; font-size: 13px; text-align: center; min-height: 20px; }
 
 /* APP */
 #app-screen { display: none; flex-direction: column; min-height: 100vh; }
 #app-screen.active { display: flex; }
 
-.app-header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.app-header { background: var(--bg-secondary); border-bottom: 1px solid rgba(0,0,0,0.15); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .header-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--gold); display: flex; align-items: center; gap: 10px; }
 .header-nav { display: flex; gap: 4px; }
-.nav-btn { background: transparent; border: none; color: var(--text-secondary); font-size: 13px; font-family: 'Inter', sans-serif; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
-.nav-btn:hover { background: var(--bg-card); color: var(--text-primary); }
-.nav-btn.active { background: var(--green); color: var(--gold); }
+.nav-btn { background: transparent; border: none; color: rgba(255,255,255,0.75); font-size: 13px; font-family: 'Inter', sans-serif; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+.nav-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.nav-btn.active { background: var(--gold); color: #fff; }
 .header-right { display: flex; align-items: center; gap: 12px; }
-.user-badge { font-size: 13px; color: var(--text-secondary); padding: 4px 12px; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border); }
-.logout-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
-.logout-btn:hover { border-color: var(--red); color: #ff6060; }
+.user-badge { font-size: 13px; color: rgba(255,255,255,0.7); padding: 4px 12px; background: rgba(255,255,255,0.1); border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+.logout-btn { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+.logout-btn:hover { border-color: rgba(255,255,255,0.6); color: #fff; }
 
 .tab-content { display: none; flex: 1; }
 .tab-content.active { display: block; }
@@ -98,15 +99,15 @@ body { overflow-x: hidden; }
 .filter-bar label { font-size: 13px; color: var(--text-muted); }
 .filter-select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 7px 12px; border-radius: var(--radius-sm); font-size: 13px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; }
 .filter-select:focus { border-color: var(--gold-dark); }
-.save-btn { background: var(--gold); border: none; border-radius: var(--radius-sm); padding: 8px 20px; color: #1a0f00; font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity 0.2s; margin-left: auto; }
+.save-btn { background: var(--gold); border: none; border-radius: var(--radius-sm); padding: 8px 20px; color: #ffffff; font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity 0.2s; margin-left: auto; }
 .save-btn:hover { opacity: 0.85; }
 
 .phase-section { margin-bottom: 32px; }
 .phase-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--gold); white-space: nowrap; }
+.phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: #1a5c2a; white-space: nowrap; }
 .phase-line { flex: 1; height: 1px; background: var(--border); }
 
-.match-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 5px; transition: border-color 0.2s; }
+.match-card { background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 5px; transition: border-color 0.2s; }
 .match-card:hover { border-color: var(--green-dim); }
 .match-card.locked { opacity: 0.85; }
 .match-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 10px; color: var(--text-muted); flex-wrap: wrap; gap: 2px; }
@@ -115,8 +116,8 @@ body { overflow-x: hidden; }
 .match-meta-center { display: flex; justify-content: center; }
 .match-meta-right { display: flex; justify-content: flex-end; align-items: center; }
 .match-status-badge { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-.badge-open { background: rgba(34,168,74,0.15); color: var(--green-light); border: 1px solid rgba(34,168,74,0.3); }
-.badge-locked { background: rgba(192,32,32,0.15); color: #ff7070; border: 1px solid rgba(192,32,32,0.3); }
+.badge-open { background: #dff5e7; color: var(--green-light); border: 1px solid rgba(34,168,74,0.3); }
+.badge-locked { background: rgba(192,32,32,0.15); color: #c0392b; border: 1px solid rgba(192,32,32,0.3); }
 
 .match-body { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
 .team-side { display: flex; align-items: center; gap: 6px; overflow: hidden; min-width: 0; }
@@ -129,7 +130,7 @@ body { overflow-x: hidden; }
 
 .score-area { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .score-inputs { display: flex; align-items: center; gap: 4px; justify-content: center; }
-.score-input { width: 34px; height: 34px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 5px; color: var(--text-primary); font-size: 15px; font-weight: 700; text-align: center; font-family: 'Bebas Neue', sans-serif; outline: none; transition: border-color 0.2s; -moz-appearance: textfield; }
+.score-input { width: 34px; height: 34px; background: #ffffff; border: 1px solid var(--border); border-radius: 5px; color: var(--text-primary); font-size: 15px; font-weight: 700; text-align: center; font-family: 'Bebas Neue', sans-serif; outline: none; transition: border-color 0.2s; -moz-appearance: textfield; }
 .score-input::-webkit-outer-spin-button, .score-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .score-input:focus { border-color: var(--gold-dark); }
 .score-input:disabled { opacity: 0.45; cursor: not-allowed; background: var(--bg-primary); }
@@ -163,8 +164,8 @@ body { overflow-x: hidden; }
 /* BET ROWS — x pinned to horizontal center */
 .bets-panel-inner { display: flex; flex-direction: column; gap: 2px; }
 .bet-row { display: grid; grid-template-columns: 1fr 22px 56px 20px 44px 1fr 44px; align-items: center; padding: 5px 7px; border-radius: 5px; }
-.bet-row.even { background: rgba(255,255,255,0.04); }
-.bet-row.odd  { background: rgba(0,0,0,0.18); }
+.bet-row.even { background: rgba(0,0,0,0.04); }
+.bet-row.odd  { background: rgba(0,0,0,0.04); }
 .bet-row.top-score { background: rgba(34,168,74,0.13); border: 1px solid rgba(34,168,74,0.3); }
 .bet-name { color: var(--text-primary); font-weight: 500; font-size: 12px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bet-score-flag { width: 22px; height: 14px; border-radius: 1px; border: 1px solid var(--border); background: var(--bg-card); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -178,7 +179,7 @@ body { overflow-x: hidden; }
 .bet-score-cell { display: contents; }
 
 /* GROUP CLASSIFICATION */
-.classified-section { background: var(--bg-card2); border-radius: var(--radius-sm); padding: 14px; margin-top: 12px; border: 1px solid var(--border); }
+.classified-section { background: #ffffff; border-radius: var(--radius-sm); padding: 14px; margin-top: 12px; border: 1px solid var(--border); }
 .classified-title { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
 .classified-row { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; margin-bottom: 6px; }
 .classified-label { font-size: 12px; color: var(--text-muted); font-weight: 700; }
@@ -201,7 +202,7 @@ body { overflow-x: hidden; }
 .rank-pos.top2 { color: #c0c0c0; }
 .rank-pos.top3 { color: #cd7f32; }
 .rank-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
-.rank-pts { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--gold); text-align: center; }
+.rank-pts { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: #1a5c2a; text-align: center; }
 
 /* ADMIN */
 .admin-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
@@ -228,7 +229,7 @@ body { overflow-x: hidden; }
 .participant-row:last-child { border-bottom: none; }
 .p-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .p-login { font-size: 11px; color: var(--text-muted); }
-.remove-btn { background: transparent; border: 1px solid rgba(192,32,32,0.3); color: #ff7070; font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+.remove-btn { background: transparent; border: 1px solid rgba(192,32,32,0.3); color: #c0392b; font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
 .remove-btn:hover { background: rgba(192,32,32,0.15); }
 
 .scoring-grid { display: grid; grid-template-columns: 1fr 70px; align-items: center; gap: 8px 16px; }
@@ -273,23 +274,38 @@ body { overflow-x: hidden; }
 /* TOAST */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-card2); border: 1px solid var(--border-gold); border-radius: var(--radius-sm); padding: 12px 20px; color: var(--gold); font-size: 13px; font-weight: 600; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; max-width: 280px; }
 .toast.show { transform: translateY(0); opacity: 1; }
-.toast.error { border-color: rgba(192,32,32,0.6); color: #ff7070; }
+.toast.error { border-color: rgba(192,32,32,0.6); color: #c0392b; }
 .toast.success { border-color: rgba(34,168,74,0.5); color: var(--green-light); }
 
 /* MOBILE */
 @media (max-width: 640px) {
-  .header-logo { font-size: 16px; }
-  .nav-btn { font-size: 11px; padding: 5px 8px; }
+  .header-logo { font-size: 22px; }
+  .nav-btn { font-size: 10px; padding: 4px 6px; }
   .team-name { font-size: 11px; }
-  .score-input { width: 38px; height: 38px; font-size: 16px; }
-  .match-card { padding: 10px 12px; }
+  .score-input { width: 34px; height: 34px; font-size: 15px; }
+  .match-card { padding: 6px 8px; margin-bottom: 4px; }
+  .match-meta { font-size: 10px; }
+  .match-meta-left { font-size: 10px; }
+  .match-status-badge { font-size: 9px; padding: 2px 6px; }
+  .match-body { padding: 4px 0; }
+  .score-sep { font-size: 14px; margin: 0 2px; }
+  .phase-title { font-size: 15px; }
+  .classified-section { padding: 8px 10px; }
+  .classified-row { gap: 4px; margin-bottom: 4px; }
+  .classified-label { font-size: 11px; min-width: 22px; }
+  .see-bets-btn { font-size: 10px; padding: 2px 8px; }
   .admin-match-row { grid-template-columns: 1fr; gap: 8px; }
   .admin-grid { grid-template-columns: 1fr; }
-  .login-card { padding: 32px 20px; margin: 16px; }
-  .login-title { font-size: 22px; }
-  #tab-matches > div, #tab-ranking > div, #tab-admin > div { padding: 12px; }
-  .stats-bar { gap: 8px; }
-  .stat-item { padding: 8px 12px; }
+  .login-card { padding: 28px 16px; margin: 12px; }
+  .login-title { font-size: 20px; }
+  #tab-matches > div, #tab-ranking > div, #tab-admin > div, #tab-picks > div { padding: 8px 8px; }
+  .stats-bar { gap: 6px; }
+  .stat-item { padding: 6px 8px; }
+  .team-flag-wrap { width: 20px; height: 14px; }
+  .pts-badge { font-size: 10px; padding: 1px 5px; }
+  .app-header { padding: 0 10px; height: 52px; }
+  .user-badge { font-size: 11px; padding: 3px 8px; }
+  .logout-btn { font-size: 11px; padding: 4px 8px; }
 }
 </style>
 </head>
@@ -327,7 +343,7 @@ body { overflow-x: hidden; }
 <div id="scoring-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9998;align-items:center;justify-content:center">
   <div style="background:var(--bg-card2);border:1px solid var(--border-gold);border-radius:var(--radius);padding:24px;max-width:360px;width:90%;position:relative">
     <button onclick="document.getElementById('scoring-popup').style.display='none'" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer">✕</button>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:2px;margin-bottom:16px">Pontuações</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#1a5c2a;letter-spacing:2px;margin-bottom:16px">Pontuações</div>
     <div id="scoring-popup-content"></div>
   </div>
 </div>
@@ -350,17 +366,17 @@ body { overflow-x: hidden; }
       <button class="nav-btn" id="nav-admin" onclick="showTab('admin')" style="display:none">Admin</button>
     </nav>
     <div class="header-right">
-      <div class="user-badge" id="user-badge"></div>
+      <div class="user-badge" id="user-badge" style="display:none"></div>
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </header>
 
   <!-- MATCHES -->
   <div id="tab-matches" class="tab-content active">
-    <div style="padding:20px;max-width:900px;margin:0 auto">
+    <div style="padding:16px 12px;max-width:900px;margin:0 auto">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <button onclick="showScoringPopup()" style="background:var(--bg-card2);border:1px solid var(--border-gold);color:var(--gold);font-size:12px;padding:5px 14px;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif;font-weight:600">🏆 Pontuações</button>
-        <span id="unsaved-indicator" style="font-size:11px;color:#ff9070;display:none">● Palpites não salvos</span>
+        <button onclick="showScoringPopup()" style="background:var(--bg-card2);border:1px solid #1a5c2a;color:#1a5c2a;font-size:12px;padding:5px 14px;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif;font-weight:600">🏆 Pontuações</button>
+        <span id="unsaved-indicator" style="font-size:11px;color:#c0392b;display:none">● Palpites não salvos</span>
       </div>
       <div id="matches-container"></div>
     </div>
@@ -368,7 +384,11 @@ body { overflow-x: hidden; }
 
   <!-- PICKS -->
   <div id="tab-picks" class="tab-content">
-    <div style="padding:20px;max-width:900px;margin:0 auto">
+    <div style="padding:16px 12px;max-width:900px;margin:0 auto">
+      <div style="display:flex;gap:8px;margin-bottom:18px">
+        <button id="picks-view-selections" onclick="setPicksView('selections')" style="border:1px solid var(--gold);background:var(--gold);color:#000;font-size:12px;padding:5px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Por seleções</button>
+        <button id="picks-view-participant" onclick="setPicksView('participant')" style="border:1px solid var(--border);background:var(--bg-card2);color:var(--text-muted);font-size:12px;padding:5px 16px;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">Por participante</button>
+      </div>
       <div id="picks-container"></div>
     </div>
   </div>
@@ -387,7 +407,7 @@ body { overflow-x: hidden; }
 
   <!-- ADMIN -->
   <div id="tab-admin" class="tab-content">
-    <div style="padding:20px;max-width:1000px;margin:0 auto">
+    <div style="padding:16px 12px;max-width:1000px;margin:0 auto">
       <div class="phase-header" style="margin-bottom:20px">
         <div class="phase-title">⚙️ Painel Admin</div>
         <div class="phase-line"></div>
@@ -444,7 +464,11 @@ body { overflow-x: hidden; }
             <div class="scoring-label">Vencedor correto (resultado)</div><input class="scoring-input" type="number" id="sc-winner" value="2" min="0">
             <div class="scoring-label">Erro — vencedor errado</div><input class="scoring-input" type="number" id="sc-miss" value="0" min="0">
             <div class="scoring-sep"></div>
-            <div class="scoring-label">Slot correto — Segunda Fase</div><input class="scoring-input" type="number" id="sc-r32" value="6" min="0">
+            <div class="scoring-label">Acertar 1º lugar do grupo</div><input class="scoring-input" type="number" id="sc-g1" value="6" min="0">
+            <div class="scoring-label">Acertar 2º lugar do grupo</div><input class="scoring-input" type="number" id="sc-g2" value="4" min="0">
+            <div class="scoring-label">Acertar 3º lugar do grupo</div><input class="scoring-input" type="number" id="sc-g3" value="2" min="0">
+            <div class="scoring-label">Acertar 4º lugar do grupo</div><input class="scoring-input" type="number" id="sc-g4" value="1" min="0">
+            <div class="scoring-sep"></div>
             <div class="scoring-label">Slot correto — Oitavas de Final</div><input class="scoring-input" type="number" id="sc-r16" value="8" min="0">
             <div class="scoring-label">Slot correto — Quartas de Final</div><input class="scoring-input" type="number" id="sc-qf" value="10" min="0">
             <div class="scoring-label">Slot correto — Semifinais</div><input class="scoring-input" type="number" id="sc-sf" value="12" min="0">
@@ -558,7 +582,7 @@ const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 // Derived from the bracket rules provided.
 // 'all' means all 48 teams.
 const KO_SLOT_GROUPS = {
-  // Segunda Fase (r32_1 to r32_16 in default order)
+  // Segunda Fase — manual away slots show only the 3rd-place teams from specific groups
   r32_1:  {home:'E',        away:'ABCDF'},
   r32_2:  {home:'I',        away:'CDFGH'},
   r32_3:  {home:'A',        away:'B'},
@@ -756,7 +780,7 @@ let S = {
   koTeams: {},       // {mid: {home,away}} — admin-set teams for KO matches
   slotNames: {},     // {mid: string} — admin-editable slot label e.g. "SF4"
   flags: {},
-  scoring: {exact:5,winnerOne:3,winner:2,miss:0,r32:6,r16:8,qf:10,sf:12,tp:12,f:15,champ:20,vice:12,third:8,fourth:5},
+  scoring: {exact:5,winnerOne:3,winner:2,miss:0,g1:6,g2:4,g3:2,g4:1,r16:8,qf:10,sf:12,tp:12,f:15,champ:20,vice:12,third:8,fourth:5},
   revealed: false,   // admin toggle: reveal group/KO picks in bets panels
   revealDeadline: '',// ISO datetime string for reveal cutoff
   lockMode: 'match', // 'match' = lock at match time | 'global' = lock all at globalLockDeadline
@@ -765,6 +789,7 @@ let S = {
   picksLockMode: 'firstmatch', // 'firstmatch' | 'deadline'
   picksLockDeadline: '', // ISO datetime string for long-term picks deadline
   finalResults: {},  // {champ, vice, third, fourth} — admin-set final standings
+  groupResults: {},  // {A:{pos1,pos2,pos3,pos4}, B:...} — admin-set real group standings
   currentUser: null,
 };
 
@@ -802,7 +827,7 @@ const SHARED_DOC = () => DB.collection('bolao').doc('shared');
 const USER_DOC   = uid => DB.collection('bolao').doc('user_' + uid);
 
 // Shared state fields (admin writes, everyone reads)
-const SHARED_FIELDS = ['users','matchMeta','koTeams','slotNames','scoring','revealed','revealDeadline','realScores','flags','lockMode','globalLockDeadline','forceLocked','picksLockMode','picksLockDeadline','finalResults'];
+const SHARED_FIELDS = ['users','matchMeta','koTeams','slotNames','scoring','revealed','revealDeadline','realScores','flags','lockMode','globalLockDeadline','forceLocked','picksLockMode','picksLockDeadline','finalResults','groupResults'];
 
 // Per-user fields
 const USER_FIELDS = ['bets','classes','koPicks','champPicks'];
@@ -821,6 +846,7 @@ async function persist(){
     shared.picksLockMode = S.picksLockMode||'firstmatch';
     shared.picksLockDeadline = S.picksLockDeadline||'';
     shared.finalResults = S.finalResults||{};
+    shared.groupResults = S.groupResults||{};
 
     if(S.currentUser && S.currentUser.isAdmin){
       await SHARED_DOC().set(shared, {merge:true});
@@ -1007,6 +1033,17 @@ function totalPts(uid){
     }
   });
 
+  // Group classification scoring
+  const grResults=S.groupResults||{};
+  const grScoring={pos1:S.scoring.g1||6, pos2:S.scoring.g2||4, pos3:S.scoring.g3||2, pos4:S.scoring.g4||1};
+  GROUPS.forEach(g=>{
+    const real=grResults[g]||{};
+    const pick=(S.classes[uid]||{})[g]||{};
+    ['pos1','pos2','pos3','pos4'].forEach(pos=>{
+      if(real[pos]&&pick[pos]&&real[pos]===pick[pos]) p+=grScoring[pos];
+    });
+  });
+
   // Champ picks scoring
   const fr=S.finalResults||{};
   if(Object.keys(fr).length>0){
@@ -1057,12 +1094,12 @@ async function doLogin(){
   FB_READY.then(async ()=>{
     await hydrateShared();
     await hydrateUserData(user.id);
-    await hydrateAllUsers();
     subscribeShared();
-    // Refresh UI with full data
     renderMatches();
     renderRanking();
     if(user.isAdmin) renderAdminStatus();
+    // Load all other users in background (non-blocking)
+    hydrateAllUsers().catch(e=>console.error('hydrateAllUsers error',e));
   }).catch(e=>console.error('Background load error',e));
 }
 function doLogout(){
@@ -1118,14 +1155,82 @@ function showAdminSub(sub, btn){
   if(sub==='status') renderAdminStatus();
 }
 
-// ============================================================
-// PICKS TAB
+let _picksView='selections';
+function setPicksView(v){
+  _picksView=v;
+  ['selections','participant'].forEach(x=>{
+    const btn=document.getElementById('picks-view-'+x);
+    if(!btn) return;
+    if(x===v){
+      btn.style.background='var(--gold)'; btn.style.color='#000'; btn.style.borderColor='var(--gold)';
+    } else {
+      btn.style.background='var(--bg-card2)'; btn.style.color='var(--text-muted)'; btn.style.borderColor='var(--border)';
+    }
+  });
+  renderPicks();
+}
+
+function renderPicksByParticipant(){
+  const participants=S.users.filter(u=>!u.isAdmin).sort((a,b)=>a.name.localeCompare(b.name,"pt"));
+  const posLabels={pos1:'1º',pos2:'2º',pos3:'3º',pos4:'4º'};
+  const champSlots=[
+    {key:'champ', label:'Campeão'},
+    {key:'vice',  label:'Vice'},
+    {key:'third', label:'3º Colocado'},
+    {key:'fourth',label:'4º Colocado'},
+  ];
+  let html='';
+  participants.forEach(u=>{
+    const cls=S.classes[u.id]||{};
+    const cp=S.champPicks[u.id]||{};
+    html+=`<div class="match-card" style="padding:12px;margin-bottom:8px">
+      <div style="font-weight:700;font-size:14px;color:var(--text-primary);margin-bottom:10px">${u.name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px">`;
+    GROUPS.forEach(g=>{
+      const gcls=cls[g]||{};
+      const grReal=(S.groupResults||{})[g]||{};
+      const grScoring={pos1:S.scoring.g1||6, pos2:S.scoring.g2||4, pos3:S.scoring.g3||2, pos4:S.scoring.g4||1};
+      const hasRealResults=Object.values(grReal).some(Boolean);
+      html+=`<div style="font-size:11px">
+        <span style="color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-size:10px">Grupo ${g}</span>
+        <div style="display:flex;flex-direction:column;gap:1px;margin-top:2px">
+          ${['pos1','pos2','pos3','pos4'].map(pos=>{
+            const pick=gcls[pos]||'';
+            const label=posLabels[pos];
+            const realPick=grReal[pos]||'';
+            let ptsHtml='';
+            if(hasRealResults){
+              const correct=pick&&realPick&&realPick===pick;
+              const pts=correct?grScoring[pos]:0;
+              ptsHtml=`<span style="min-width:32px;text-align:right;color:${correct?'var(--green-light)':'var(--text-muted)'};font-size:10px;flex-shrink:0">${pts} pts</span>`;
+            }
+            if(!pick) return `<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="min-width:20px;display:inline-block">${label}:</span><span style="flex:1">—</span>${ptsHtml}</div>`;
+            const code=Object.keys(TEAMS).find(k=>k===pick);
+            const flag=code&&S.flags[code]?`<img src="${S.flags[code]}" style="width:16px;height:11px;object-fit:contain;border-radius:1px;vertical-align:middle">`:'';
+            return `<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary)"><span style="min-width:20px;display:inline-block">${label}:</span>${flag}<span style="flex:1">${TN(pick)||pick}</span>${ptsHtml}</div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    });
+    html+=`</div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 6px"></div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        ${champSlots.map(s=>{
+          const pick=cp[s.key]||'';
+          const code=Object.keys(TEAMS).find(k=>TN(k)===pick||k===pick);
+          const flag=code&&S.flags[code]?`<img src="${S.flags[code]}" style="width:16px;height:11px;object-fit:contain;border-radius:1px;vertical-align:middle">`:'';
+          return `<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-primary)"><span style="min-width:90px;display:inline-block;color:var(--text-muted)">${s.label}:</span>${flag}<strong>${pick||'—'}</strong></div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  return html||'<div style="color:var(--text-muted);padding:20px">Nenhum participante.</div>';
+}
 // ============================================================
 function renderPicks(){
   const container=document.getElementById('picks-container');
   if(!container) return;
 
-  // Check if picks are locked (revealed)
   if(!isPicksLocked()){
     // Determine the deadline to show
     let dateStr='11/06 às 16:00';
@@ -1141,6 +1246,12 @@ function renderPicks(){
         <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:2px">Palpites ainda não liberados</div>
         <div style="font-size:14px;color:var(--text-secondary)">Os palpites serão liberados no dia <strong style="color:var(--text-primary)">${dateStr}</strong></div>
       </div>`;
+    return;
+  }
+
+  // Branch on view mode
+  if(_picksView==='participant'){
+    container.innerHTML=renderPicksByParticipant();
     return;
   }
 
@@ -1220,6 +1331,69 @@ function buildGroupPicksPanel(group){
   return html||'<div style="color:var(--text-muted);font-size:12px;padding:8px 0">Nenhum palpite registrado.</div>';
 }
 
+// Helper: get participant's classification pick for a group/position
+function getClsPick(uid, group, pos){
+  return ((S.classes[uid]||{})[group]||{})[pos]||'';
+}
+
+// Helper: auto-resolve a slot definition like {group:'A', pos:'pos1'}
+function autoSlotName(uid, group, pos){
+  const pick = getClsPick(uid, group, pos);
+  return pick || '';
+}
+
+// 3ºs classificados card (Change 2)
+function thirdPlaceCard(uid){
+  const locked = isPicksLocked();
+  const thirds = S.classes[uid]||{};
+  // Collect all pos3 picks from all 12 groups
+  const allThirds = GROUPS.map(g=>((thirds[g]||{}).pos3||'')).filter(Boolean);
+  const allFilled = allThirds.length === 12;
+  const current3rd = (S.classes[uid]||{})['_thirds']||{};
+
+  // 8 slots for qualified 3rd-place teams
+  const slots = [1,2,3,4,5,6,7,8];
+
+  function makeSelect(slot){
+    const key = 't3_'+slot;
+    const cur = current3rd[key]||'';
+    // Already selected in other slots
+    const taken = slots.filter(s=>s!==slot).map(s=>current3rd['t3_'+s]||'').filter(Boolean);
+    const available = allThirds.filter(t=>!taken.includes(t)||t===cur);
+    const opts = available.map(t=>{
+      const code = Object.keys(TEAMS).find(k=>k===t||TN(k)===t);
+      const label = code?TN(code):t;
+      return `<option value="${t}"${cur===t?' selected':''}>${label}</option>`;
+    }).join('');
+    return `<select class="classified-select t3-sel" data-slot="${slot}" ${locked||!allFilled?'disabled':''} style="flex:1;min-width:0;font-size:12px">
+      <option value="">Selecionar...</option>${opts}
+    </select>`;
+  }
+
+  const notice = !allFilled
+    ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">⚠️ Preencha os 3ºs colocados de todos os 12 grupos primeiro.</div>`
+    : '';
+
+  const grid = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    ${slots.map(s=>`<div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--text-muted);min-width:16px">${s}.</span>
+      ${makeSelect(s)}
+    </div>`).join('')}
+  </div>`;
+
+  return `<div class="phase-section">
+    <div class="phase-header"><div class="phase-title">3ºS CLASSIFICADOS</div><div class="phase-line"></div></div>
+    <div class="classified-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="classified-title" style="margin-bottom:0">8 Terceiros que se classificam</div>
+        ${!locked&&allFilled ? `<button class="see-bets-btn" onclick="saveAllBets()" style="border-color:var(--green-dim);color:var(--green-light)">💾 Salvar</button>` : ''}
+      </div>
+      ${notice}${grid}
+      ${locked?'<div class="deadline-passed-notice" style="margin-top:8px">⏳ Prazo encerrado</div>':''}
+    </div>
+  </div>`;
+}
+
 // ============================================================
 // MATCHES RENDER
 // ============================================================
@@ -1247,6 +1421,8 @@ function renderMatches(){
       html+=groupClassCard(g, uid);
       html+=`</div>`;
     });
+    // 3ºs classificados block (Change 2)
+    html+=thirdPlaceCard(uid);
     KO_PHASES.forEach(phase=>{
       const kms=MATCHES.filter(m=>m.phase===phase);
       if(!kms.length) return;
@@ -1365,7 +1541,7 @@ function groupClassCard(group, uid){
   const teams=[...new Set([...gmatches.map(m=>m.home),...gmatches.map(m=>m.away)])];
   const locked=isPicksLocked();
   const cls=(S.classes[uid]||{})[group]||{};
-  const posLabels={pos1:'1º',pos2:'2º',pos3:'3º'};
+  const posLabels={pos1:'1º',pos2:'2º',pos3:'3º',pos4:'4º'};
 
   function flagHtml(code){
     if(!code||code==='none'||code==='') return `<span style="display:inline-block;width:22px;height:15px;background:var(--bg-card2);border-radius:2px;border:1px solid var(--border);vertical-align:middle;"></span>`;
@@ -1373,20 +1549,22 @@ function groupClassCard(group, uid){
     return `<span style="font-size:16px;line-height:1;vertical-align:middle;">${FLAGS[code]||'🏳'}</span>`;
   }
 
-  let rows=['pos1','pos2','pos3'].map(pos=>{
+  let rows=['pos1','pos2','pos3','pos4'].map(pos=>{
     const selId=`cls_${group}_${pos}_${uid}`;
     const flagId=`clsf_${group}_${pos}_${uid}`;
     const current=cls[pos]||'';
     const opts=teams.map(t=>`<option value="${t}"${current===t?' selected':''}>${TN(t)}</option>`).join('');
-    const noneOpt=pos==='pos3'?`<option value="none"${current==='none'?' selected':''}>Sem 3º classificado</option>`:'';
     return `<div class="classified-row">
       <div class="classified-label">${posLabels[pos]}</div>
       <div style="display:flex;align-items:center;gap:6px;width:100%">
         <span id="${flagId}" style="flex-shrink:0">${flagHtml(current)}</span>
         <select id="${selId}" class="classified-select cls-sel" data-group="${group}" data-pos="${pos}" data-flagid="${flagId}" ${locked?'disabled':''} style="flex:1;min-width:0">
           <option value="">Selecionar...</option>
-          ${noneOpt}${opts}
+          ${opts}
         </select>
+        ${!locked&&current
+          ?`<button onclick="clearClsSlot('${group}','${pos}','${uid}')" style="background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:0;line-height:1;width:22px;flex-shrink:0" title="Limpar">✕</button>`
+          :'<span style="width:22px;flex-shrink:0;display:inline-block"></span>'}
       </div>
     </div>`;
   }).join('');
@@ -1407,7 +1585,7 @@ function koCard(m, uid){
   const pickLocked=isPicksLocked();
   const {date:kd,time:kt}=getMeta(m);
   const adminTeams=S.koTeams[m.id]||{};
-  const pick=(S.koPicks[uid]||{})[m.id]||{};
+  let pick=(S.koPicks[uid]||{})[m.id]||{};
   const bet=(S.bets[uid]||{})[m.id]||{};
   const real=S.realScores[m.id];
   const pts=calcPts(bet,real);
@@ -1424,15 +1602,208 @@ function koCard(m, uid){
   const homeFE=homeT&&homeT.code?FE(homeT.code):'';
   const awayFE=awayT&&awayT.code?FE(awayT.code):'';
 
-  // Get allowed teams for this slot
-  const slotGroups = KO_SLOT_GROUPS[m.id]||{home:'all',away:'all'};
-  const homeAllowed = teamsFromGroups(slotGroups.home);
-  const awayAllowed = teamsFromGroups(slotGroups.away);
+  // AUTO-SLOT DEFINITIONS for r32 (Change 3)
+  // {group, pos} = auto-filled from participant's group classification
+  // null = manual select (keep dropdown)
+  const R32_AUTO = {
+    r32_1:  {home:{group:'E',pos:'pos1'}, away:null},
+    r32_2:  {home:{group:'I',pos:'pos1'}, away:null},
+    r32_3:  {home:{group:'A',pos:'pos2'}, away:{group:'B',pos:'pos2'}},
+    r32_4:  {home:{group:'F',pos:'pos1'}, away:{group:'C',pos:'pos2'}},
+    r32_5:  {home:{group:'K',pos:'pos2'}, away:{group:'L',pos:'pos2'}},
+    r32_6:  {home:{group:'H',pos:'pos1'}, away:{group:'J',pos:'pos2'}},
+    r32_7:  {home:{group:'D',pos:'pos1'}, away:null},
+    r32_8:  {home:{group:'G',pos:'pos1'}, away:null},
+    r32_9:  {home:{group:'C',pos:'pos1'}, away:{group:'F',pos:'pos2'}},
+    r32_10: {home:{group:'E',pos:'pos2'}, away:{group:'I',pos:'pos2'}},
+    r32_11: {home:{group:'A',pos:'pos1'}, away:null},
+    r32_12: {home:{group:'L',pos:'pos1'}, away:null},
+    r32_13: {home:{group:'J',pos:'pos1'}, away:{group:'H',pos:'pos2'}},
+    r32_14: {home:{group:'D',pos:'pos2'}, away:{group:'G',pos:'pos2'}},
+    r32_15: {home:{group:'B',pos:'pos1'}, away:null},
+    r32_16: {home:{group:'K',pos:'pos1'}, away:null},
+  };
 
-  const teamOpts = homeAllowed.sort((a,b)=>TN(a).localeCompare(TN(b)))
-    .map(c=>'<option value="'+TN(c)+'"'+(pick.home===TN(c)?' selected':'')+'>'+TN(c)+'</option>').join('');
-  const teamOptsAway = awayAllowed.sort((a,b)=>TN(a).localeCompare(TN(b)))
-    .map(c=>'<option value="'+TN(c)+'"'+(pick.away===TN(c)?' selected':'')+'>'+TN(c)+'</option>').join('');
+  // CASCADED OPTIONS for r16+ (Change 4)
+  // Each side comes from the two teams in a specific r32 match (home+away picks)
+  const R16_SOURCES = {
+    r16_1: {home:'r32_1', away:'r32_2'},
+    r16_2: {home:'r32_3', away:'r32_4'},
+    r16_3: {home:'r32_5', away:'r32_6'},
+    r16_4: {home:'r32_7', away:'r32_8'},
+    r16_5: {home:'r32_9', away:'r32_10'},
+    r16_6: {home:'r32_11',away:'r32_12'},
+    r16_7: {home:'r32_13',away:'r32_14'},
+    r16_8: {home:'r32_15',away:'r32_16'},
+  };
+  const QF_SOURCES = {
+    qf_1: {home:'r16_1', away:'r16_2'},
+    qf_2: {home:'r16_3', away:'r16_4'},
+    qf_3: {home:'r16_5', away:'r16_6'},
+    qf_4: {home:'r16_7', away:'r16_8'},
+  };
+  const SF_SOURCES = {
+    sf_1: {home:'qf_1', away:'qf_2'},
+    sf_2: {home:'qf_3', away:'qf_4'},
+  };
+  const TP_SOURCES = {tp: {home:'sf_1', away:'sf_2'}};
+  const FINAL_SOURCES = {final: {home:'sf_1', away:'sf_2'}};
+
+  // Get the two team names the participant filled in a given match id
+  function getPickPair(matchId){
+    const auto = R32_AUTO[matchId];
+    let h='', a='';
+    if(auto){
+      const rawH = auto.home ? getClsPick(uid, auto.home.group, auto.home.pos) : ((S.koPicks[uid]||{})[matchId]||{}).home||'';
+      const rawA = auto.away ? getClsPick(uid, auto.away.group, auto.away.pos) : ((S.koPicks[uid]||{})[matchId]||{}).away||'';
+      // Resolve to display name
+      const codeH = rawH ? (Object.keys(TEAMS).find(k=>k===rawH||TN(k)===rawH)||rawH) : '';
+      const codeA = rawA ? (Object.keys(TEAMS).find(k=>k===rawA||TN(k)===rawA)||rawA) : '';
+      h = codeH ? TN(codeH) : rawH;
+      a = codeA ? TN(codeA) : rawA;
+    } else {
+      const kp = (S.koPicks[uid]||{})[matchId]||{};
+      h = kp.home||''; a = kp.away||'';
+    }
+    return [h,a].filter(Boolean);
+  }
+
+  // Resolve auto-slot for this match
+  let autoHome=null, autoAway=null;
+  let isAutoHome=false, isAutoAway=false;
+  const autoR32 = R32_AUTO[m.id];
+  if(autoR32){
+    if(autoR32.home){ isAutoHome=true; autoHome = getClsPick(uid, autoR32.home.group, autoR32.home.pos)||null; }
+    if(autoR32.away){ isAutoAway=true; autoAway = getClsPick(uid, autoR32.away.group, autoR32.away.pos)||null; }
+  }
+
+  // If autoHome is set, save it to koPicks automatically
+  if(autoHome && (!pick.home || pick.home !== autoHome)){
+    if(!S.koPicks[uid]) S.koPicks[uid]={};
+    if(!S.koPicks[uid][m.id]) S.koPicks[uid][m.id]={};
+    S.koPicks[uid][m.id].home = autoHome;
+    pick = S.koPicks[uid][m.id];
+  }
+  if(autoAway && (!pick.away || pick.away !== autoAway)){
+    if(!S.koPicks[uid]) S.koPicks[uid]={};
+    if(!S.koPicks[uid][m.id]) S.koPicks[uid][m.id]={};
+    S.koPicks[uid][m.id].away = autoAway;
+    pick = S.koPicks[uid][m.id];
+  }
+
+  // Compute cascaded options for r16+
+  function getCascadeOpts(phase_sources, matchSide){
+    const src = phase_sources[m.id];
+    if(!src) return null;
+    const srcId = src[matchSide]; // e.g. 'r32_1'
+    return getPickPair(srcId);
+  }
+
+  // Manual away slots for r32: show only the participant's pos3 pick from specific groups
+  const THIRD_SLOT_GROUPS = {
+    r32_1:  ['A','B','C','D','F'],
+    r32_2:  ['C','D','F','G','H'],
+    r32_7:  ['B','E','F','I','J'],
+    r32_8:  ['A','E','H','I','J'],
+    r32_11: ['C','E','F','H','I'],
+    r32_12: ['E','H','I','J','K'],
+    r32_15: ['E','F','G','I','J'],
+    r32_16: ['D','E','I','J','L'],
+  };
+
+  function thirdPicksFromGroups(groups){
+    // Get the 8 teams selected in the "3ºs classificados" block
+    const thirds = S.classes[uid]||{};
+    const qualified8 = Object.values(thirds['_thirds']||{}).filter(Boolean);
+    return groups
+      .map(g=>getClsPick(uid, g, 'pos3'))
+      .filter(code=>code && qualified8.includes(code))
+      .map(code=>{
+        const found = Object.keys(TEAMS).find(k=>k===code||TN(k)===code);
+        return found || code;
+      });
+  }
+
+  let homeAllowed, awayAllowed;
+  const allSources = {...R16_SOURCES, ...QF_SOURCES, ...SF_SOURCES, ...TP_SOURCES, ...FINAL_SOURCES};
+
+  if(allSources[m.id]){
+    homeAllowed = getCascadeOpts(allSources, 'home') || [];
+    awayAllowed = getCascadeOpts(allSources, 'away') || [];
+  } else if(THIRD_SLOT_GROUPS[m.id]){
+    // This is a manual away slot — show pos3 picks from the specific groups
+    const slotGroups = KO_SLOT_GROUPS[m.id]||{home:'all',away:'all'};
+    homeAllowed = teamsFromGroups(slotGroups.home); // home is still auto, but just in case
+    awayAllowed = thirdPicksFromGroups(THIRD_SLOT_GROUPS[m.id]);
+  } else {
+    // fully auto r32 or other
+    const slotGroups = KO_SLOT_GROUPS[m.id]||{home:'all',away:'all'};
+    homeAllowed = teamsFromGroups(slotGroups.home);
+    awayAllowed = teamsFromGroups(slotGroups.away);
+  }
+
+  // Check if previous phase is complete (for locking cascaded selects)
+  function prevPhaseDone(){
+    const allSrc = {...R16_SOURCES,...QF_SOURCES,...SF_SOURCES,...TP_SOURCES,...FINAL_SOURCES};
+    const src = allSrc[m.id];
+    if(!src) return true;
+    const srcIds = [src.home, src.away];
+    return srcIds.every(srcId=>{
+      if(!srcId) return true;
+      const pair = getPickPair(srcId);
+      return pair.length === 2;
+    });
+  }
+
+  function sideReady(matchSide){
+    const allSrc = {...R16_SOURCES,...QF_SOURCES,...SF_SOURCES,...TP_SOURCES,...FINAL_SOURCES};
+    const src = allSrc[m.id];
+    if(!src) return true;
+    const srcId = src[matchSide];
+    if(!srcId) return true;
+    return getPickPair(srcId).length === 2;
+  }
+
+  const homeCascadeLocked = allSources[m.id] && !sideReady('home');
+  const awayCascadeLocked = allSources[m.id] && !sideReady('away');
+
+  function buildSide(side, allowed, autoVal, isAuto){
+    if(isAuto){
+      if(autoVal){
+        const code = Object.keys(TEAMS).find(k=>k===autoVal||TN(k)===autoVal);
+        const displayName = code ? TN(code) : autoVal;
+        const flagHtml = code ? FE(code) : '';
+        return `<div id="auto_slot_${m.id}_${side}" style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--gold)">
+          ${code?`<div class="team-flag-wrap" style="width:22px;height:15px;flex-shrink:0">${flagHtml}</div>`:''}
+          <span>${displayName}</span>
+        </div>`;
+      } else {
+        const autoR32def = autoR32[side];
+        const hint = autoR32def ? `${autoR32def.pos==='pos1'?'1º':'2º'} Grupo ${autoR32def.group}` : '—';
+        return `<div id="auto_slot_${m.id}_${side}" style="font-size:10px;color:var(--text-muted);padding:2px 4px;font-style:italic">${hint}</div>`;
+      }
+    }
+    const sideCascadeLocked = side==='home' ? homeCascadeLocked : awayCascadeLocked;
+    const currentPick = pick[side]||'';
+    if(sideCascadeLocked || allowed.length===0){
+      return `<select class="classified-select ko-pick-sel" data-mid="${m.id}" data-side="${side}" data-phase="${m.phase||''}" disabled style="font-size:10px;padding:2px 4px;height:22px;min-width:0;opacity:0.4">
+        <option>Preencha fase anterior</option>
+      </select>`;
+    }
+    const isCode = allowed.length>0 && Object.keys(TEAMS).includes(allowed[0]);
+    const opts = allowed.map(t=>{
+      const label = isCode ? TN(t) : t;
+      const val = isCode ? TN(t) : t;
+      return `<option value="${val}"${currentPick===val?' selected':''}>${label}</option>`;
+    }).join('');
+    return `<select class="classified-select ko-pick-sel" data-mid="${m.id}" data-side="${side}" data-phase="${m.phase||''}"
+      ${pickLocked||sideCascadeLocked?'disabled':''} style="font-size:10px;padding:2px 4px;height:22px;min-width:0">
+      <option value="">Seu palpite</option>${opts}
+    </select>`;
+  }
+
+  const homeEl = buildSide('home', homeAllowed, autoHome, isAutoHome);
+  const awayEl = buildSide('away', awayAllowed, autoAway, isAutoAway);
 
   // Calculate total pts: match score pts + slot pick pts
   let totalKoPts = calcPts(bet, real);
@@ -1480,13 +1851,9 @@ function koCard(m, uid){
       '</div>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:4px;align-items:center;margin-top:6px">'+
-      '<select class="classified-select ko-pick-sel" data-mid="'+m.id+'" data-side="home" data-phase="'+(m.phase||'')+'" '+(pickLocked?'disabled':'')+' style="font-size:10px;padding:2px 4px;height:22px;min-width:0">'+
-        '<option value="">Seu palpite</option>'+teamOpts+
-      '</select>'+
+      homeEl+
       '<span style="color:var(--text-muted);font-size:10px;text-align:center;padding:0 2px">&times;</span>'+
-      '<select class="classified-select ko-pick-sel" data-mid="'+m.id+'" data-side="away" data-phase="'+(m.phase||'')+'" '+(pickLocked?'disabled':'')+' style="font-size:10px;padding:2px 4px;height:22px;min-width:0">'+
-        '<option value="">Seu palpite</option>'+teamOptsAway+
-      '</select>'+
+      awayEl+
     '</div>'+
     '<div class="bets-panel" id="bp-'+m.id+'"></div>'+
   '</div>';
@@ -1518,6 +1885,21 @@ function attachMatchListeners(container, uid){
         }
       }
       S.champPicks[uid][key]=val;
+      markUnsaved();
+      // Re-render the champ block in-place so X buttons appear immediately
+      const champCard = this.closest('.match-card');
+      if(champCard){
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = champPicksBlock(uid);
+        const newSection = tempDiv.querySelector('.phase-section');
+        if(newSection){
+          const phaseSection = champCard.closest('.phase-section');
+          if(phaseSection){
+            phaseSection.replaceWith(newSection);
+            attachMatchListeners(newSection, uid);
+          }
+        }
+      }
     });
   });
   container.querySelectorAll('.ko-pick-sel').forEach(sel=>{
@@ -1549,6 +1931,10 @@ function attachMatchListeners(container, uid){
       if(!S.koPicks[uid]) S.koPicks[uid]={};
       if(!S.koPicks[uid][mid]) S.koPicks[uid][mid]={};
       S.koPicks[uid][mid][side]=val;
+      markUnsaved();
+      const _sy=window.scrollY;
+      renderMatches();
+      requestAnimationFrame(()=>window.scrollTo(0,_sy));
     });
   });
   container.querySelectorAll('.cls-sel').forEach(sel=>{
@@ -1568,26 +1954,27 @@ function attachMatchListeners(container, uid){
       }
 
       // Block selecting pos3 if already 8 groups have a real pos3 pick
-      if(pos==='pos3' && newVal && newVal!=='none' && newVal!==''){
-        const allCls=S.classes[uid]||{};
-        const currentGroupHasPos3=((allCls[g]||{}).pos3||'');
-        const currentGroupAlreadyCounted = currentGroupHasPos3 && currentGroupHasPos3!=='none' && currentGroupHasPos3!=='';
-        const countWithPos3=GROUPS.filter(gr=>{
-          const v=(allCls[gr]||{}).pos3||'';
-          return v && v!=='none' && v!=='';
-        }).length;
-        // If this group didn't already have a pos3, check if we'd exceed 8
-        if(!currentGroupAlreadyCounted && countWithPos3>=8){
-          showToast('Máximo de 8 grupos com 3º classificado! Pelo menos 4 grupos devem ficar sem 3º.','error');
-          this.value=((S.classes[uid]||{})[g]||{}).pos3||''; // revert
-          return;
-        }
+      if(false){ // removed - no longer limiting pos3 selections
       }
 
       if(!S.classes[uid]) S.classes[uid]={};
       if(!S.classes[uid][g]) S.classes[uid][g]={};
       S.classes[uid][g][pos]=newVal;
       markUnsaved();
+      updateAutoSlots(uid);
+      updateKOSections(uid);
+      // Re-render just this group's classification card in-place (no scroll jump)
+      const sectionEl = this.closest('.classified-section');
+      if(sectionEl){
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = groupClassCard(g, uid);
+        const newSection = tempDiv.querySelector('.classified-section');
+        if(newSection){
+          sectionEl.replaceWith(newSection);
+          // Attach listeners to the new section only
+          attachMatchListeners(newSection, uid);
+        }
+      }
 
       // update flag preview
       const flagEl=document.getElementById(this.dataset.flagid);
@@ -1601,6 +1988,18 @@ function attachMatchListeners(container, uid){
           flagEl.innerHTML=`<span style="font-size:16px;line-height:1;vertical-align:middle;">${FLAGS[code]||'🏳'}</span>`;
         }
       }
+    });
+  });
+  // 3rd-place qualifier selectors
+  container.querySelectorAll('.t3-sel').forEach(sel=>{
+    sel.addEventListener('change', function(){
+      const slot=this.dataset.slot;
+      const val=this.value;
+      if(!S.classes[uid]) S.classes[uid]={};
+      if(!S.classes[uid]['_thirds']) S.classes[uid]['_thirds']={};
+      S.classes[uid]['_thirds']['t3_'+slot]=val;
+      markUnsaved();
+      renderMatches();
     });
   });
 }
@@ -1783,25 +2182,30 @@ function showScoringPopup(){
   const content=document.getElementById('scoring-popup-content');
   content.innerHTML=`
     <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
-      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Fase de Grupos</div>
-      <div style="display:flex;justify-content:space-between"><span>Placar exato</span><span style="color:var(--gold);font-weight:700">${sc.exact} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Um placar certo</span><span style="color:var(--gold);font-weight:700">${sc.winnerOne} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Resultado certo</span><span style="color:var(--gold);font-weight:700">${sc.winner} pts</span></div>
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Placares — Fase de Grupos</div>
+      <div style="display:flex;justify-content:space-between"><span>Placar exato</span><span style="color:#1a5c2a;font-weight:700">${sc.exact} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Um placar certo</span><span style="color:#1a5c2a;font-weight:700">${sc.winnerOne} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Resultado certo</span><span style="color:#1a5c2a;font-weight:700">${sc.winner} pts</span></div>
       <div style="display:flex;justify-content:space-between"><span>Errou</span><span style="color:var(--text-muted)">${sc.miss} pts</span></div>
       <div style="border-top:1px solid var(--border);margin:6px 0"></div>
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Classificação de Grupos</div>
+      <div style="display:flex;justify-content:space-between"><span>Acertar 1º do grupo</span><span style="color:#1a5c2a;font-weight:700">${sc.g1||6} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Acertar 2º do grupo</span><span style="color:#1a5c2a;font-weight:700">${sc.g2||4} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Acertar 3º do grupo</span><span style="color:#1a5c2a;font-weight:700">${sc.g3||2} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Acertar 4º do grupo</span><span style="color:#1a5c2a;font-weight:700">${sc.g4||1} pts</span></div>
+      <div style="border-top:1px solid var(--border);margin:6px 0"></div>
       <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Slots Mata-Mata</div>
-      <div style="display:flex;justify-content:space-between"><span>Segunda Fase (slot correto)</span><span style="color:var(--gold);font-weight:700">${sc.r32} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Oitavas (slot correto)</span><span style="color:var(--gold);font-weight:700">${sc.r16} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Quartas (slot correto)</span><span style="color:var(--gold);font-weight:700">${sc.qf} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Semifinal (slot correto)</span><span style="color:var(--gold);font-weight:700">${sc.sf} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Disputa de 3º Lugar (slot correto)</span><span style="color:var(--gold);font-weight:700">${sc.tp||sc.sf} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Final (slot correto)</span><span style="color:var(--gold);font-weight:700">${sc.f} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Oitavas (slot correto)</span><span style="color:#1a5c2a;font-weight:700">${sc.r16} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Quartas (slot correto)</span><span style="color:#1a5c2a;font-weight:700">${sc.qf} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Semifinal (slot correto)</span><span style="color:#1a5c2a;font-weight:700">${sc.sf} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Disputa de 3º Lugar (slot correto)</span><span style="color:#1a5c2a;font-weight:700">${sc.tp||sc.sf} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Final (slot correto)</span><span style="color:#1a5c2a;font-weight:700">${sc.f} pts</span></div>
       <div style="border-top:1px solid var(--border);margin:6px 0"></div>
       <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Palpites Especiais</div>
-      <div style="display:flex;justify-content:space-between"><span>Campeão</span><span style="color:var(--gold);font-weight:700">${sc.champ} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>Vice-Campeão</span><span style="color:var(--gold);font-weight:700">${sc.vice} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>3º Colocado</span><span style="color:var(--gold);font-weight:700">${sc.third} pts</span></div>
-      <div style="display:flex;justify-content:space-between"><span>4º Colocado</span><span style="color:var(--gold);font-weight:700">${sc.fourth} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Campeão</span><span style="color:#1a5c2a;font-weight:700">${sc.champ} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Vice-Campeão</span><span style="color:#1a5c2a;font-weight:700">${sc.vice} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>3º Colocado</span><span style="color:#1a5c2a;font-weight:700">${sc.third} pts</span></div>
+      <div style="display:flex;justify-content:space-between"><span>4º Colocado</span><span style="color:#1a5c2a;font-weight:700">${sc.fourth} pts</span></div>
     </div>`;
   document.getElementById('scoring-popup').style.display='flex';
 }
@@ -1834,6 +2238,99 @@ function showScoreLog(){
     }).join('');
   }
   document.getElementById('score-log-modal').style.display='flex';
+}
+
+// Update auto-filled KO slot labels in-place (no scroll jump, no full re-render)
+// Re-render KO phase sections in-place without touching group cards or scrolling
+function updateKOSections(uid){
+  const container = document.getElementById('matches-container');
+  if(!container) return;
+  // Find all phase-section elements that contain KO cards (have a ko-pick-sel or auto_slot)
+  const sections = container.querySelectorAll('.phase-section');
+  sections.forEach(section=>{
+    const hasKO = section.querySelector('.ko-pick-sel, [id^="auto_slot_"]');
+    if(!hasKO) return;
+    // Get the phase title to know which phase this is
+    const titleEl = section.querySelector('.phase-title');
+    if(!titleEl) return;
+    const phase = titleEl.textContent.trim();
+    const kms = MATCHES.filter(m=>m.phase.toUpperCase()===phase.toUpperCase());
+    if(!kms.length) return;
+    // Build replacement HTML
+    let newHtml = `<div class="phase-section"><div class="phase-header"><div class="phase-title">${phase}</div><div class="phase-line"></div></div>`;
+    kms.forEach(m=>{ newHtml += koCard(m, uid); });
+    newHtml += '</div>';
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = newHtml;
+    const newSection = tempDiv.firstElementChild;
+    section.replaceWith(newSection);
+    // Re-attach listeners on the new section
+    attachMatchListeners(newSection, uid);
+  });
+}
+
+function updateAutoSlots(uid){
+  const R32_AUTO_DEF = {
+    r32_1:  {home:{group:'E',pos:'pos1'}, away:null},
+    r32_2:  {home:{group:'I',pos:'pos1'}, away:null},
+    r32_3:  {home:{group:'A',pos:'pos2'}, away:{group:'B',pos:'pos2'}},
+    r32_4:  {home:{group:'F',pos:'pos1'}, away:{group:'C',pos:'pos2'}},
+    r32_5:  {home:{group:'K',pos:'pos2'}, away:{group:'L',pos:'pos2'}},
+    r32_6:  {home:{group:'H',pos:'pos1'}, away:{group:'J',pos:'pos2'}},
+    r32_7:  {home:{group:'D',pos:'pos1'}, away:null},
+    r32_8:  {home:{group:'G',pos:'pos1'}, away:null},
+    r32_9:  {home:{group:'C',pos:'pos1'}, away:{group:'F',pos:'pos2'}},
+    r32_10: {home:{group:'E',pos:'pos2'}, away:{group:'I',pos:'pos2'}},
+    r32_11: {home:{group:'A',pos:'pos1'}, away:null},
+    r32_12: {home:{group:'L',pos:'pos1'}, away:null},
+    r32_13: {home:{group:'J',pos:'pos1'}, away:{group:'H',pos:'pos2'}},
+    r32_14: {home:{group:'D',pos:'pos2'}, away:{group:'G',pos:'pos2'}},
+    r32_15: {home:{group:'B',pos:'pos1'}, away:null},
+    r32_16: {home:{group:'K',pos:'pos1'}, away:null},
+  };
+
+  Object.entries(R32_AUTO_DEF).forEach(([matchId, def])=>{
+    ['home','away'].forEach(side=>{
+      const autoDef = def[side];
+      if(!autoDef) return;
+      const el = document.getElementById('auto_slot_'+matchId+'_'+side);
+      if(!el) return;
+      const pick = getClsPick(uid, autoDef.group, autoDef.pos);
+      if(pick){
+        const code = Object.keys(TEAMS).find(k=>k===pick||TN(k)===pick);
+        const displayName = code ? TN(code) : pick;
+        const flagHtml = code ? FE(code) : '';
+        el.innerHTML = `<div style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--gold)">
+          ${code?`<div class="team-flag-wrap" style="width:22px;height:15px;flex-shrink:0">${flagHtml}</div>`:''}
+          <span>${displayName}</span>
+        </div>`;
+        // Update koPicks in memory so cascade options work
+        if(!S.koPicks[uid]) S.koPicks[uid]={};
+        if(!S.koPicks[uid][matchId]) S.koPicks[uid][matchId]={};
+        S.koPicks[uid][matchId][side] = displayName;
+      } else {
+        const posLabel = autoDef.pos==='pos1'?'1º':'2º';
+        el.innerHTML = `<div style="font-size:10px;color:var(--text-muted);padding:2px 4px;font-style:italic">${posLabel} Grupo ${autoDef.group}</div>`;
+        // Clear koPicks for this slot
+        if(S.koPicks[uid]&&S.koPicks[uid][matchId]) S.koPicks[uid][matchId][side]='';
+      }
+    });
+  });
+}
+
+function clearChampSlot(key, uid){
+  if(!S.champPicks[uid]) S.champPicks[uid]={};
+  S.champPicks[uid][key]='';
+  markUnsaved();
+  const scrollY=window.scrollY; renderMatches(); window.scrollTo(0,scrollY);
+}
+
+function clearClsSlot(group, pos, uid){
+  if(!S.classes[uid]) S.classes[uid]={};
+  if(!S.classes[uid][group]) S.classes[uid][group]={};
+  S.classes[uid][group][pos]='';
+  markUnsaved();
+  const scrollY=window.scrollY; renderMatches(); window.scrollTo(0,scrollY);
 }
 
 function saveAllBets(){
@@ -1968,23 +2465,42 @@ function doReset(){
 function champPicksBlock(uid){
   const locked=isPicksLocked();
   const cp=(S.champPicks[uid]||{});
-  const allTeamOpts=Object.keys(TEAMS).sort((a,b)=>TN(a).localeCompare(TN(b)));
+  const kp=(S.koPicks[uid]||{});
+
+  // Get the 2 teams picked in Final and in Disputa de 3º
+  const finalPicks = [kp['final']?.home||'', kp['final']?.away||''].filter(Boolean);
+  const tpPicks    = [kp['tp']?.home||'',    kp['tp']?.away||''   ].filter(Boolean);
+
+  const finalReady = finalPicks.length===2;
+  const tpReady    = tpPicks.length===2;
+
   const slots=[
-    {key:'champ',label:'🥇 Campeão'},
-    {key:'vice', label:'🥈 Vice-Campeão'},
-    {key:'third',label:'🥉 3º Colocado'},
-    {key:'fourth',label:'4️⃣ 4º Colocado'},
+    {key:'champ', label:'🥇 Campeão',     teams:finalPicks, ready:finalReady},
+    {key:'vice',  label:'🥈 Vice-Campeão', teams:finalPicks, ready:finalReady},
+    {key:'third', label:'🥉 3º Colocado',  teams:tpPicks,    ready:tpReady},
+    {key:'fourth',label:'4️⃣ 4º Colocado',  teams:tpPicks,    ready:tpReady},
   ];
+
   const rows=slots.map(s=>{
     const cur=cp[s.key]||'';
-    const opts=allTeamOpts.map(c=>`<option value="${TN(c)}"${cur===TN(c)?' selected':''}>${TN(c)}</option>`).join('');
+    if(!s.ready){
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:11px;color:var(--text-muted);white-space:nowrap;min-width:110px">${s.label}</span>
+        <select class="classified-select" disabled style="font-size:11px;padding:3px 6px;height:26px;flex:1;min-width:0;opacity:0.4">
+          <option>Preencha a fase anterior</option>
+        </select>
+      </div>`;
+    }
+    const opts=s.teams.map(t=>`<option value="${t}"${cur===t?' selected':''}>${t}</option>`).join('');
     return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
       <span style="font-size:11px;color:var(--text-muted);white-space:nowrap;min-width:110px">${s.label}</span>
       <select class="classified-select champ-sel" data-key="${s.key}" ${locked?'disabled':''} style="font-size:11px;padding:3px 6px;height:26px;flex:1;min-width:0">
         <option value="">—</option>${opts}
       </select>
+      ${!locked&&cur?`<button onclick="clearChampSlot('${s.key}','${uid}')" style="background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:0 2px;line-height:1" title="Limpar">✕</button>`:''}
     </div>`;
   }).join('');
+
   return `<div class="phase-section">
     <div class="phase-header"><div class="phase-title">🏆 CAMPEÃO / VICE / 3º / 4º</div><div class="phase-line"></div></div>
     <div class="match-card" style="padding:10px 12px">
@@ -2216,6 +2732,66 @@ function renderAdminMatchesList(activePhase){
       </div>
     </div>`;
   }).join('');
+
+  // If this is a group phase, append real classification block
+  const isGroupPhase = !ms[0]?.isKO && ms[0]?.group;
+  const groupLetter = isGroupPhase ? ms[0].group : null;
+  if(groupLetter){
+    const gmatches=MATCHES.filter(m=>m.group===groupLetter);
+    const gteams=[...new Set([...gmatches.map(m=>m.home),...gmatches.map(m=>m.away)])];
+    const gr=(S.groupResults||{})[groupLetter]||{};
+    const posLabels={pos1:'1º lugar',pos2:'2º lugar',pos3:'3º lugar',pos4:'4º lugar'};
+    const rows=['pos1','pos2','pos3','pos4'].map(pos=>{
+      const cur=gr[pos]||'';
+      const opts=gteams.map(t=>`<option value="${t}"${cur===t?' selected':''}>${TN(t)}</option>`).join('');
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:12px;color:var(--text-muted);min-width:70px">${posLabels[pos]}</span>
+        <select class="admin-input" id="gr_${groupLetter}_${pos}" onchange="onGroupResultChange('${groupLetter}')" style="flex:1;max-width:200px;padding:4px 8px;font-size:12px">
+          <option value="">— Selecionar —</option>${opts}
+        </select>
+      </div>`;
+    }).join('');
+    document.getElementById('admin-matches-list').innerHTML+=`
+      <div style="margin-top:14px;padding:12px;background:var(--bg-card2);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Classificação Real — Grupo ${groupLetter}</div>
+        ${rows}
+        <button class="admin-save-match" style="margin-top:4px" onclick="saveGroupResults('${groupLetter}')">💾 Salvar Classificação</button>
+        <div id="gr-status-${groupLetter}" style="font-size:11px;color:var(--text-muted);margin-top:6px"></div>
+      </div>`;
+  }
+}
+
+function onGroupResultChange(g){
+  const vals=['pos1','pos2','pos3','pos4'].map(pos=>(document.getElementById(`gr_${g}_${pos}`)||{}).value||'');
+  vals.forEach((v,i)=>{
+    if(!v) return;
+    const dupIdx=vals.findIndex((u,j)=>j<i&&u===v);
+    if(dupIdx>=0){
+      const el=document.getElementById(`gr_${g}_pos${i+1}`);
+      if(el){ el.value=''; showToast(`${TN(v)} já está em outro slot!`,'error'); }
+    }
+  });
+}
+
+function saveGroupResults(g){
+  if(!S.groupResults) S.groupResults={};
+  const gr={};
+  const vals=[];
+  let valid=true;
+  ['pos1','pos2','pos3','pos4'].forEach(pos=>{
+    const el=document.getElementById(`gr_${g}_${pos}`);
+    const v=el?el.value:'';
+    if(v){
+      if(vals.includes(v)){ showToast(`${TN(v)} está em dois slots!`,'error'); valid=false; return; }
+      vals.push(v);
+    }
+    gr[pos]=v;
+  });
+  if(!valid) return;
+  S.groupResults[g]=gr;
+  persist()
+    .then(()=>{ renderRanking(); const el=document.getElementById(`gr-status-${g}`); if(el) el.textContent='✅ Salvo!'; showToast(`Grupo ${g} salvo!`,'success'); })
+    .catch(()=>showToast('❌ Erro ao salvar','error'));
 }
 
 function saveKOTeams(mid){
@@ -2299,7 +2875,7 @@ function uploadFlag(code, inp){
       const canvas=document.createElement('canvas');
       canvas.width=W; canvas.height=H;
       const ctx=canvas.getContext('2d');
-      ctx.fillStyle='#122a1a';
+      ctx.fillStyle='#ffffff';
       ctx.fillRect(0,0,W,H);
       const imgRatio=img.width/img.height;
       const slotRatio=W/H;
@@ -2331,7 +2907,10 @@ function loadScoring(){
   document.getElementById('sc-winner-one').value=sc.winnerOne;
   document.getElementById('sc-winner').value=sc.winner;
   document.getElementById('sc-miss').value=sc.miss;
-  document.getElementById('sc-r32').value=sc.r32;
+  document.getElementById('sc-g1').value=sc.g1||6;
+  document.getElementById('sc-g2').value=sc.g2||4;
+  document.getElementById('sc-g3').value=sc.g3||2;
+  document.getElementById('sc-g4').value=sc.g4||1;
   document.getElementById('sc-r16').value=sc.r16;
   document.getElementById('sc-qf').value=sc.qf;
   document.getElementById('sc-sf').value=sc.sf;
@@ -2348,7 +2927,10 @@ function saveScoring(){
     winnerOne:+document.getElementById('sc-winner-one').value||3,
     winner:+document.getElementById('sc-winner').value||2,
     miss:+document.getElementById('sc-miss').value||0,
-    r32:+document.getElementById('sc-r32').value||6,
+    g1:+document.getElementById('sc-g1').value||6,
+    g2:+document.getElementById('sc-g2').value||4,
+    g3:+document.getElementById('sc-g3').value||2,
+    g4:+document.getElementById('sc-g4').value||1,
     r16:+document.getElementById('sc-r16').value||8,
     qf:+document.getElementById('sc-qf').value||10,
     sf:+document.getElementById('sc-sf').value||12,
@@ -2553,15 +3135,17 @@ FB_READY.then(async () => {
     const user = S.users.find(x=>x.id===uid);
     if(user){
       S.currentUser = user;
-      // Enter app immediately with shared data already loaded
-      enterApp(user);
-      // Load user-specific data in background
-      hydrateUserData(user.id).then(()=>hydrateAllUsers()).then(()=>{
-        subscribeShared();
-        renderMatches();
-        renderRanking();
-        if(user.isAdmin) renderAdminStatus();
-      }).catch(e=>console.error('Background load error',e));
+      // Load user data FIRST, then enter app so data is ready on first render
+      hydrateUserData(user.id).then(()=>{
+        enterApp(user);
+        // Load all users' picks in background
+        hydrateAllUsers().then(()=>{
+          subscribeShared();
+          renderMatches();
+          renderRanking();
+          if(user.isAdmin) renderAdminStatus();
+        }).catch(e=>console.error('hydrateAllUsers error',e));
+      }).catch(e=>{ console.error('hydrateUserData error',e); enterApp(user); });
       return;
     }
   }
