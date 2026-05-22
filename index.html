@@ -1638,13 +1638,27 @@ function koCard(m, uid){
   const FINAL_SOURCES = {final: {home:'sf_1', away:'sf_2'}};
 
   // Get the two team names the participant filled in a given match id
+  // For manual away r32 slots, returns all possible 3rd-place teams instead of single pick
   function getPickPair(matchId){
     const auto = R32_AUTO[matchId];
+    // Special case: manual away r32 slot — return home auto + all possible thirds
+    if(auto && !auto.away && THIRD_SLOT_GROUPS[matchId]){
+      const rawH = auto.home ? getClsPick(uid, auto.home.group, auto.home.pos) : '';
+      const codeH = rawH ? (Object.keys(TEAMS).find(k=>k===rawH||TN(k)===rawH)||rawH) : '';
+      const h = codeH ? TN(codeH) : rawH;
+      const thirds = thirdPicksFromGroups(THIRD_SLOT_GROUPS[matchId]);
+      const result = [];
+      if(h) result.push(h);
+      thirds.forEach(code=>{
+        const name = TN(code)||code;
+        if(!result.includes(name)) result.push(name);
+      });
+      return result;
+    }
     let h='', a='';
     if(auto){
       const rawH = auto.home ? getClsPick(uid, auto.home.group, auto.home.pos) : ((S.koPicks[uid]||{})[matchId]||{}).home||'';
       const rawA = auto.away ? getClsPick(uid, auto.away.group, auto.away.pos) : ((S.koPicks[uid]||{})[matchId]||{}).away||'';
-      // Resolve to display name
       const codeH = rawH ? (Object.keys(TEAMS).find(k=>k===rawH||TN(k)===rawH)||rawH) : '';
       const codeA = rawA ? (Object.keys(TEAMS).find(k=>k===rawA||TN(k)===rawA)||rawA) : '';
       h = codeH ? TN(codeH) : rawH;
@@ -1712,6 +1726,14 @@ function koCard(m, uid){
       });
   }
 
+  function thirdTeamsLabel(groups){
+    const teams = thirdPicksFromGroups(groups);
+    if(!teams.length) return '<span style="font-size:10px;color:var(--text-muted);font-style:italic">Preencha 3ºs classificados</span>';
+    const names = teams.map(code=>TN(code)||code);
+    if(names.length===1) return `<span style="font-size:11px;color:#1a5c2a;font-weight:600">${names[0]}</span>`;
+    return `<span style="font-size:11px;color:#1a5c2a;font-weight:600">${names.slice(0,-1).join(', ')} ou ${names[names.length-1]}</span>`;
+  }
+
   let homeAllowed, awayAllowed;
   const allSources = {...R16_SOURCES, ...QF_SOURCES, ...SF_SOURCES, ...TP_SOURCES, ...FINAL_SOURCES};
 
@@ -1719,12 +1741,10 @@ function koCard(m, uid){
     homeAllowed = getCascadeOpts(allSources, 'home') || [];
     awayAllowed = getCascadeOpts(allSources, 'away') || [];
   } else if(THIRD_SLOT_GROUPS[m.id]){
-    // This is a manual away slot — show pos3 picks from the specific groups
     const slotGroups = KO_SLOT_GROUPS[m.id]||{home:'all',away:'all'};
-    homeAllowed = teamsFromGroups(slotGroups.home); // home is still auto, but just in case
+    homeAllowed = teamsFromGroups(slotGroups.home);
     awayAllowed = thirdPicksFromGroups(THIRD_SLOT_GROUPS[m.id]);
   } else {
-    // fully auto r32 or other
     const slotGroups = KO_SLOT_GROUPS[m.id]||{home:'all',away:'all'};
     homeAllowed = teamsFromGroups(slotGroups.home);
     awayAllowed = teamsFromGroups(slotGroups.away);
@@ -1749,13 +1769,25 @@ function koCard(m, uid){
     if(!src) return true;
     const srcId = src[matchSide];
     if(!srcId) return true;
-    return getPickPair(srcId).length === 2;
+    // For manual away r32 slots: ready as long as home auto-slot is filled
+    // (away is now a text label with multiple options, not a single pick)
+    const auto = R32_AUTO[srcId];
+    if(auto && !auto.away && THIRD_SLOT_GROUPS[srcId]){
+      const homeCode = auto.home ? getClsPick(uid, auto.home.group, auto.home.pos) : '';
+      const thirds = thirdPicksFromGroups(THIRD_SLOT_GROUPS[srcId]);
+      return !!(homeCode && thirds.length > 0);
+    }
+    return getPickPair(srcId).length >= 2;
   }
 
   const homeCascadeLocked = allSources[m.id] && !sideReady('home');
   const awayCascadeLocked = allSources[m.id] && !sideReady('away');
 
   function buildSide(side, allowed, autoVal, isAuto){
+    // Manual away slot on r32: show as text label, not a select
+    if(!isAuto && THIRD_SLOT_GROUPS[m.id] && side==='away'){
+      return `<div style="text-align:right;padding:2px 0">${thirdTeamsLabel(THIRD_SLOT_GROUPS[m.id])}</div>`;
+    }
     if(isAuto){
       if(autoVal){
         const code = Object.keys(TEAMS).find(k=>k===autoVal||TN(k)===autoVal);
@@ -2579,7 +2611,7 @@ function renderRules(){
           <button style="background:transparent;border:1px solid #222;color:#222;font-size:12px;padding:3px 8px;border-radius:4px;cursor:pointer" onclick="document.execCommand('foreColor',false,'#222')">Preto</button>
           <button style="background:transparent;border:1px solid var(--border);color:#333;font-size:12px;padding:3px 8px;border-radius:4px;cursor:pointer" onclick="document.execCommand('insertHorizontalRule')">&#8213;</button>
         </div>
-        <div id="rules-richtext" contenteditable="true" style="min-height:300px;background:#fff;border:1px solid var(--border);border-radius:0 0 8px 8px;padding:14px;font-size:13px;font-family:Inter,sans-serif;color:var(--text-primary);outline:none;line-height:1.7">${rulesText}</div>
+        <div id="rules-richtext" contenteditable="true" style="min-height:300px;background:#fff;border:1px solid var(--border);border-radius:0 0 8px 8px;padding:14px;font-size:13px;font-family:Inter,sans-serif;color:var(--text-primary);outline:none;line-height:1.7;overflow-x:auto;word-break:break-word;max-width:100%;box-sizing:border-box">${rulesText}</div>
         <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
           <button onclick="cancelRulesEdit()" style="background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer">Cancelar</button>
           <button onclick="saveRules()" style="background:#1a5c2a;border:none;color:#fff;font-size:11px;padding:4px 14px;border-radius:6px;cursor:pointer;font-weight:600">💾 Salvar Regulamento</button>
@@ -2624,7 +2656,7 @@ function renderRules(){
 
     el.innerHTML=`
       ${editSection}
-      <div id="rules-display" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;font-size:13px;color:var(--text-primary);line-height:1.6">${rulesText}</div>
+      <div id="rules-display" style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;font-size:13px;color:var(--text-primary);line-height:1.6;overflow-x:auto;word-break:break-word;max-width:100%;box-sizing:border-box">${rulesText}</div>
       ${scoringBlock}`;
   }).catch(()=>{
     el.innerHTML='<div style="color:var(--text-muted)">Erro ao carregar regulamento.</div>';
