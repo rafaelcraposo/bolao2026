@@ -365,6 +365,21 @@ body { overflow-x: hidden; }
     <div id="score-log-content"></div>
   </div>
 </div>
+<div id="rules-accept-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:28px 24px;max-width:420px;width:92%;position:relative">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#1a5c2a;letter-spacing:2px">📋 Regulamento</div><button onclick="document.getElementById('rules-accept-modal').style.display='none'" style="background:none;border:none;font-size:20px;color:#888;cursor:pointer;line-height:1">✕</button></div>
+    <p style="font-size:13px;color:#444;margin-bottom:16px;line-height:1.6">Para fazer palpites você precisa confirmar que leu e aceita o Regulamento do Bolão 2026.</p>
+    <div style="background:#f0faf3;border-radius:8px;padding:10px 14px;margin-bottom:18px;max-height:180px;overflow-y:auto;font-size:12px;color:#555;line-height:1.6">
+      Para ver o regulamento completo, acesse a aba <strong>"Regulamento"</strong> no menu superior.
+    </div>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:20px;font-size:13px;color:#222">
+      <input type="checkbox" id="rules-accept-check" style="width:18px;height:18px;accent-color:#1a5c2a;cursor:pointer">
+      <span>Li e aceito o Regulamento do Bolão 2026</span>
+    </label>
+    <button onclick="confirmRulesAccept()" style="width:100%;background:#1a5c2a;color:#fff;border:none;padding:12px;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;font-weight:700;cursor:pointer;letter-spacing:1px">Continuar</button>
+  </div>
+</div>
+
 <div id="app-screen" class="screen">
   <header class="app-header">
     <div class="header-logo">🏆 BOLÃO 2026</div>
@@ -526,6 +541,16 @@ body { overflow-x: hidden; }
             <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
               <input type="radio" name="lock-mode" value="match" onchange="saveLockMode()" style="accent-color:var(--gold)">
               <span><strong>Até o horário do jogo</strong> — cada confronto fecha individualmente no horário definido</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
+              <input type="radio" name="lock-mode" value="before" onchange="saveLockMode()" style="accent-color:var(--gold);margin-top:2px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span><strong>X minutos antes do jogo</strong> — cada confronto fecha antes do horário</span>
+                <div id="before-minutes-wrap" style="display:none;align-items:center;gap:8px;flex-wrap:wrap">
+                  <input type="number" class="admin-input" id="lock-minutes-before" min="1" max="1440" value="30" style="width:80px" oninput="saveLockMode()">
+                  <span style="font-size:13px;color:var(--text-secondary)">minutos antes</span>
+                </div>
+              </div>
             </label>
             <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--text-primary)">
               <input type="radio" name="lock-mode" value="global" onchange="saveLockMode()" style="accent-color:var(--gold);margin-top:2px">
@@ -818,7 +843,8 @@ let S = {
   realThirds: [], // admin-set list of 8 qualified 3rd-place teams
   revealed: false,   // admin toggle: reveal group/KO picks in bets panels
   revealDeadline: '',// ISO datetime string for reveal cutoff
-  lockMode: 'match', // 'match' = lock at match time | 'global' = lock all at globalLockDeadline
+  lockMode: 'match', // 'match' | 'global' | 'before'
+  minutesBefore: 30, // minutes before match time to lock
   globalLockDeadline: '', // ISO datetime string e.g. "2026-06-11T19:00"
   forceLocked: false, // admin override: force all matches locked regardless of date
   picksLockMode: 'firstmatch', // 'firstmatch' | 'deadline'
@@ -863,7 +889,7 @@ const SHARED_DOC = () => DB.collection('bolao').doc('shared');
 const USER_DOC   = uid => DB.collection('bolao').doc('user_' + uid);
 
 // Shared state fields (admin writes, everyone reads)
-const SHARED_FIELDS = ['users','matchMeta','koTeams','slotNames','scoring','scoringLabels','revealed','revealDeadline','realScores','flags','lockMode','globalLockDeadline','forceLocked','picksLockMode','picksLockDeadline','finalResults','groupResults','closedMatches','realThirds'];
+const SHARED_FIELDS = ['users','matchMeta','koTeams','slotNames','scoring','scoringLabels','revealed','revealDeadline','realScores','flags','lockMode','minutesBefore','globalLockDeadline','forceLocked','picksLockMode','picksLockDeadline','finalResults','groupResults','closedMatches','realThirds'];
 
 // Per-user fields
 const USER_FIELDS = ['bets','classes','koPicks','champPicks'];
@@ -999,16 +1025,18 @@ function getMeta(m){
 
 function isDeadline(){ return new Date() > DEADLINE; }
 function isLocked(m){
-  // Admin forced all locked (without touching dates)
   if(S.forceLocked) return true;
-  // Global deadline mode: all matches lock at the global deadline
   if(S.lockMode==='global' && S.globalLockDeadline){
     return new Date() >= new Date(S.globalLockDeadline+':00-03:00');
   }
-  // Default: lock at match time
   const {date,time}=getMeta(m);
   if(!date||!time) return false;
-  return new Date() >= new Date(`${date}T${time}:00-03:00`);
+  const matchTime = new Date(`${date}T${time}:00-03:00`);
+  if(S.lockMode==='before'){
+    const mins = S.minutesBefore||30;
+    return new Date() >= new Date(matchTime.getTime() - mins*60000);
+  }
+  return new Date() >= matchTime;
 }
 
 // Get scoring multiplier for a match round
@@ -1474,13 +1502,15 @@ function matchCard(m, bets, uid){
     ? (real&&real.home!=null ? `<div class="real-score-line">Resultado: ${real.home}×${real.away}</div>` : '')
     : (real&&real.home!=null ? `<div class="real-score-line">${real.home}–${real.away}</div>` : '');
 
-  // Countdown for open matches
+  // Countdown for open matches — shows time until lock (may be before match start)
   let countdownHtml='';
   if(!locked){
     const {date:cd,time:ct}=getMeta(m);
     if(cd&&ct){
-      const dtIso=`${cd}T${ct}:00-03:00`;
-      countdownHtml=`<span class="match-countdown" data-dt="${dtIso}" style="font-size:10px;color:var(--text-muted);margin-left:6px"></span>`;
+      const matchMs = new Date(`${cd}T${ct}:00-03:00`).getTime();
+      const lockMs = S.lockMode==='before' ? matchMs - (S.minutesBefore||30)*60000 : matchMs;
+      const lockIso = new Date(lockMs).toISOString();
+      countdownHtml=`<span class="match-countdown" data-dt="${lockIso}" style="font-size:10px;color:var(--text-muted);margin-left:6px"></span>`;
     }
   }
 
@@ -1740,6 +1770,16 @@ function koCard(m, uid){
   if(allSources[m.id]){
     homeAllowed = getCascadeOpts(allSources, 'home') || [];
     awayAllowed = getCascadeOpts(allSources, 'away') || [];
+    // For tp/final: exclude teams already picked in the sibling match
+    if(m.id==='tp' || m.id==='final'){
+      const siblingId = m.id==='tp' ? 'final' : 'tp';
+      const siblingPick = (S.koPicks[uid]||{})[siblingId]||{};
+      const siblingPicked = [siblingPick.home, siblingPick.away].filter(Boolean);
+      if(siblingPicked.length){
+        homeAllowed = homeAllowed.filter(t=>!siblingPicked.includes(t));
+        awayAllowed = awayAllowed.filter(t=>!siblingPicked.includes(t));
+      }
+    }
   } else if(THIRD_SLOT_GROUPS[m.id]){
     const slotGroups = KO_SLOT_GROUPS[m.id]||{home:'all',away:'all'};
     homeAllowed = teamsFromGroups(slotGroups.home);
@@ -1881,6 +1921,7 @@ function koCard(m, uid){
 function attachMatchListeners(container, uid){
   container.querySelectorAll('.bet-inp').forEach(inp=>{
     inp.addEventListener('input', function(){
+      if(!hasAcceptedRules()){ this.value=''; requireRulesAccept(()=>{}); return; }
       const mid=this.dataset.mid, side=this.dataset.side;
       if(!S.bets[uid]) S.bets[uid]={};
       if(!S.bets[uid][mid]) S.bets[uid][mid]={};
@@ -1893,6 +1934,7 @@ function attachMatchListeners(container, uid){
   });
   container.querySelectorAll('.champ-sel').forEach(sel=>{
     sel.addEventListener('change', function(){
+      if(!hasAcceptedRules()){ this.value=''; requireRulesAccept(()=>{}); return; }
       const key=this.dataset.key, val=this.value;
       if(!S.champPicks[uid]) S.champPicks[uid]={};
       // Prevent duplicate
@@ -1924,6 +1966,7 @@ function attachMatchListeners(container, uid){
   });
   container.querySelectorAll('.ko-pick-sel').forEach(sel=>{
     sel.addEventListener('change', function(){
+      if(!hasAcceptedRules()){ this.value=''; requireRulesAccept(()=>{}); return; }
       const mid=this.dataset.mid, side=this.dataset.side, phase=this.dataset.phase||'';
       const val=this.value;
       if(val && phase){
@@ -1959,6 +2002,7 @@ function attachMatchListeners(container, uid){
   });
   container.querySelectorAll('.cls-sel').forEach(sel=>{
     sel.addEventListener('change', function(){
+      if(!hasAcceptedRules()){ this.value=''; requireRulesAccept(()=>{}); return; }
       const g=this.dataset.group, pos=this.dataset.pos;
       const newVal=this.value;
 
@@ -2174,6 +2218,35 @@ function showLoadingOverlay(show){
 // UNSAVED INDICATOR + COUNTDOWN TIMERS
 // ============================================================
 let _unsaved=false;
+function hasAcceptedRules(){
+  const uid=S.currentUser&&S.currentUser.id;
+  if(!uid) return false;
+  return localStorage.getItem('bolao26_rules_accepted_'+uid)==='1';
+}
+
+function confirmRulesAccept(){
+  const cb=document.getElementById('rules-accept-check');
+  if(!cb||!cb.checked){ showToast('Marque a caixa para confirmar.','error'); return; }
+  const uid=S.currentUser&&S.currentUser.id;
+  if(!uid) return;
+  localStorage.setItem('bolao26_rules_accepted_'+uid,'1');
+  // Save to user's own doc so admin can see it
+  DB.collection('bolao').doc('user_'+uid).set({rulesAccepted: true}, {merge: true}).catch(()=>{});
+  // Also update local S.users for admin status display
+  const u=S.users.find(x=>x.id===uid);
+  if(u) u.rulesAccepted=true;
+  document.getElementById('rules-accept-modal').style.display='none';
+  renderAdminStatus();
+  showToast('Regulamento aceito! Pode preencher seus palpites.','success');
+}
+
+function requireRulesAccept(callback){
+  if(hasAcceptedRules()){ callback(); return; }
+  // Show modal — after acceptance, callback won't auto-fire; user just edits normally
+  const modal=document.getElementById('rules-accept-modal');
+  if(modal) modal.style.display='flex';
+}
+
 function markUnsaved(){
   _unsaved=true;
   const el=document.getElementById('unsaved-indicator');
@@ -2567,23 +2640,86 @@ function hideSubView(){ showMatchTab('next'); }
 function hideClosedMatches(){ showMatchTab('next'); }
 
 
-const DEFAULT_RULES = `<h3 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin:0 0 8px">Como funciona</h3>
-<p>O Bolão da Copa do Mundo 2026 é uma competição amigável onde cada participante tenta acertar os resultados dos jogos e as classificações do torneio. Quanto mais você acertar, mais pontos acumula.</p>
+const DEFAULT_RULES = `
+<h2 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin:0 0 16px;border-bottom:2px solid #c8e6cc;padding-bottom:8px">🏆 Premiação</h2>
 
-<h3 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin:16px 0 8px">Palpites de Placares</h3>
-<p>Para cada confronto da fase de grupos você deve inserir o placar que acredita que vai acontecer. O prazo para inserir o palpite é até o horário de início do jogo — após isso o campo é bloqueado automaticamente.</p>
+<p style="margin:0 0 10px">Serão premiados os <strong>3 primeiros colocados</strong>, aqueles que fizerem mais pontos ao final da Copa 2026:</p>
+<div style="display:flex;flex-direction:column;gap:6px;margin:0 0 14px">
+  <div style="display:flex;align-items:center;gap:10px;background:#f0faf3;border-radius:6px;padding:8px 12px">
+    <span style="font-size:18px">🥇</span><span style="font-size:13px"><strong>1º lugar</strong> — 60% do arrecadado</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;background:#f0faf3;border-radius:6px;padding:8px 12px">
+    <span style="font-size:18px">🥈</span><span style="font-size:13px"><strong>2º lugar</strong> — 30% do arrecadado</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;background:#f0faf3;border-radius:6px;padding:8px 12px">
+    <span style="font-size:18px">🥉</span><span style="font-size:13px"><strong>3º lugar</strong> — 10% do arrecadado</span>
+  </div>
+</div>
+<p style="margin:0 0 6px;font-size:12px;color:#666"><em>Em caso de empate, a soma dos percentuais das posições empatadas será dividida igualmente. Exemplo: 2 empatados em 1º dividem 60%+30% = 45% cada.</em></p>
+<p style="margin:0 0 20px;font-size:13px;font-weight:600;color:#1a5c2a">💰 Preço da tabela: R$ 50,00</p>
 
-<h3 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin:16px 0 8px">Classificação dos Grupos</h3>
-<p>Além dos placares, você deve palpitar quem vai terminar em 1º, 2º, 3º e 4º lugar em cada um dos 12 grupos. Também deve escolher quais 8 times que terminaram em 3º lugar se classificam para a Segunda Fase.</p>
+<h2 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin:0 0 12px;border-bottom:2px solid #c8e6cc;padding-bottom:8px">⏱️ Prazos</h2>
 
-<h3 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin:16px 0 8px">Fase Mata-Mata</h3>
-<p>A partir da Segunda Fase, você vai indicando quem avança em cada confronto. Os slots são liberados automaticamente conforme você preenche a fase anterior — não é necessário esperar os resultados reais. Os palpites do mata-mata ficam disponíveis até o início do primeiro jogo da fase de grupos.</p>
+<p style="margin:0 0 8px;font-size:13px">A partir das <strong>12:00 de quinta, dia 11/06/2026</strong>, as planilhas poderão ser bloqueadas a qualquer momento, não sendo mais permitidas alterações ou novas apostas.</p>
+<div style="background:#e8f0ff;border-left:3px solid #6060c0;padding:10px 14px;border-radius:0 6px 6px 0;margin:0 0 8px;font-size:12px">
+  <p style="margin:0"><strong>📌 Observação:</strong> Após o bloqueio, células em branco não serão consideradas para pontuação. As seleções classificadas até a Fase Final não poderão ser modificadas, porém qualquer placar poderá ser alterado até 10 minutos antes da partida iniciar.</p>
+</div>
 
-<h3 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin:16px 0 8px">Campeão / Vice / 3º / 4º</h3>
-<p>Você também palpita quem será o Campeão, Vice-Campeão, 3º e 4º colocado do torneio. Esses palpites ficam disponíveis junto com os do mata-mata.</p>
+<h2 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin:20px 0 12px;border-bottom:2px solid #c8e6cc;padding-bottom:8px">📋 Critérios de Pontuação</h2>
 
-<h3 style="color:#1a5c2a;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin:16px 0 8px">Salvando os palpites</h3>
-<p>Não esqueça de clicar em <strong>Salvar</strong> após preencher seus palpites. Palpites não salvos são perdidos se você sair da página.</p>`;
+<p style="margin:0 0 10px;font-size:13px">Existem quatro tipos de contagem, consideradas cumulativamente. Usaremos o jogo fictício <strong>ALEMANHA 4 × 1 JAPÃO</strong> como exemplo:</p>
+
+<h3 style="color:#1a5c2a;font-size:14px;margin:14px 0 8px">a) Acerto do Resultado (Vitória/Empate)</h3>
+<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px">
+  <tr style="background:#1a5c2a;color:#fff">
+    <th style="padding:6px 10px;text-align:left;border-radius:6px 0 0 0">Palpite</th>
+    <th style="padding:6px 10px;text-align:right;border-radius:0 6px 0 0">Pontos</th>
+  </tr>
+  <tr style="background:#f0faf3"><td style="padding:6px 10px;border-bottom:1px solid #d0e8d0">✅ Vitória da Alemanha</td><td style="padding:6px 10px;text-align:right;font-weight:700;color:#1a5c2a;border-bottom:1px solid #d0e8d0">2 pts</td></tr>
+  <tr><td style="padding:6px 10px;border-bottom:1px solid #d0e8d0">❌ Empate</td><td style="padding:6px 10px;text-align:right;color:#888;border-bottom:1px solid #d0e8d0">0 pts</td></tr>
+  <tr style="background:#f0faf3"><td style="padding:6px 10px">❌ Vitória do Japão</td><td style="padding:6px 10px;text-align:right;color:#888">0 pts</td></tr>
+</table>
+<p style="font-size:11px;color:#666;font-style:italic;margin:0 0 14px">Esta contagem é válida para todos os jogos.</p>
+
+<h3 style="color:#1a5c2a;font-size:14px;margin:14px 0 8px">b) Acerto do Placar (exige acerto do resultado)</h3>
+<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px">
+  <tr style="background:#1a5c2a;color:#fff">
+    <th style="padding:6px 10px;text-align:left;border-radius:6px 0 0 0">Palpite</th>
+    <th style="padding:6px 10px;text-align:right;border-radius:0 6px 0 0">Pontos</th>
+  </tr>
+  <tr style="background:#f0faf3"><td style="padding:6px 10px;border-bottom:1px solid #d0e8d0">✅ Placar exato: 4×1</td><td style="padding:6px 10px;text-align:right;font-weight:700;color:#1a5c2a;border-bottom:1px solid #d0e8d0">3 pts</td></tr>
+  <tr><td style="padding:6px 10px;border-bottom:1px solid #d0e8d0">✅ Um placar certo: 3×1 ou 4×0</td><td style="padding:6px 10px;text-align:right;font-weight:700;color:#1a5c2a;border-bottom:1px solid #d0e8d0">1 pt</td></tr>
+  <tr style="background:#f0faf3"><td style="padding:6px 10px">❌ Placar errado: 1×1</td><td style="padding:6px 10px;text-align:right;color:#888">0 pts</td></tr>
+</table>
+<div style="background:#e8f0ff;border-left:3px solid #6060c0;padding:10px 14px;border-radius:0 6px 6px 0;margin:0 0 14px;font-size:12px">
+  <strong>⚠️ Observação:</strong> Mesmo que o número de gols de uma seleção esteja correto, a pontuação só é válida se o resultado (vitória/empate) também foi acertado. Exemplo: resultado ALEMANHA 4×1 JAPÃO, palpite ALEMANHA 1×1 JAPÃO → <strong>ZERO PONTO</strong>.
+</div>
+
+<p style="font-size:12px;color:#555;background:#f0faf3;border-radius:6px;padding:8px 12px;margin:0 0 14px"><strong>Exemplo com placar exato:</strong> Resultado ALEMANHA 4×1 JAPÃO, palpite ALEMANHA 4×1 JAPÃO → acerto do resultado (2 pts) + placar exato (3 pts) = <strong style="color:#1a5c2a">5 pts no total</strong>.</p>
+<h3 style="color:#1a5c2a;font-size:14px;margin:14px 0 8px">c) Acerto do Slot (a partir das Oitavas de Final)</h3>
+<p style="font-size:13px;margin:0 0 8px">O preenchimento correto pressupõe a disposição exata das seleções nas colunas. Exemplo: 1º do Grupo A = HOLANDA, 2º do Grupo B = INGLATERRA:</p>
+<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px">
+  <tr style="background:#1a5c2a;color:#fff">
+    <th style="padding:6px 10px;text-align:left;border-radius:6px 0 0 0">Palpite</th>
+    <th style="padding:6px 10px;text-align:right;border-radius:0 6px 0 0">Pontos</th>
+  </tr>
+  <tr style="background:#f0faf3"><td style="padding:6px 10px;border-bottom:1px solid #d0e8d0">✅ HOLANDA (esq.) × INGLATERRA (dir.)</td><td style="padding:6px 10px;text-align:right;font-weight:700;color:#1a5c2a;border-bottom:1px solid #d0e8d0">2x pts slot</td></tr>
+  <tr><td style="padding:6px 10px;border-bottom:1px solid #d0e8d0">🟡 HOLANDA (esq.) × ESTADOS UNIDOS (dir.)</td><td style="padding:6px 10px;text-align:right;font-weight:700;color:#b8860b;border-bottom:1px solid #d0e8d0">1x pts slot</td></tr>
+  <tr style="background:#f0faf3"><td style="padding:6px 10px;border-bottom:1px solid #d0e8d0">🟡 CATAR (esq.) × INGLATERRA (dir.)</td><td style="padding:6px 10px;text-align:right;font-weight:700;color:#b8860b;border-bottom:1px solid #d0e8d0">1x pts slot</td></tr>
+  <tr><td style="padding:6px 10px">❌ CATAR (esq.) × ESTADOS UNIDOS (dir.)</td><td style="padding:6px 10px;text-align:right;color:#888">0 pts</td></tr>
+</table>
+<div style="background:#e8f0ff;border-left:3px solid #6060c0;padding:10px 14px;border-radius:0 6px 6px 0;margin:0 0 8px;font-size:12px">
+  <strong>📌 Observação:</strong> A pontuação referente ao acerto dos slots varia de acordo com a fase da competição. Os valores de cada fase estão detalhados na tabela de pontuações ao final deste regulamento.
+</div>
+<div style="background:#e8f5ec;border-left:3px solid #1a5c2a;padding:10px 14px;border-radius:0 6px 6px 0;margin:0 0 14px;font-size:12px">
+  <strong>ℹ️ Importante:</strong> A partir da Segunda Fase, os placares são considerados independentemente do posicionamento das seleções. Se o placar foi HOLANDA 3×0 INGLATERRA, um palpite CATAR 3×0 ESTADOS UNIDOS também ganha os pontos de placar. Os placares são dos 2 tempos regulares, sem prorrogação.
+</div>
+
+<h3 style="color:#1a5c2a;font-size:14px;margin:14px 0 8px">d) Classificação de Grupos e Fase Final</h3>
+<p style="font-size:13px;margin:0 0 8px">Na Fase de Grupos, devem ser preenchidos os placares, as seleções classificadas de 1º a 4º de cada grupo, e as 8 seleções que se classificarão para a Segunda Fase. Para pontuação, não é necessário acertar a ordem entre as 8 classificadas — apenas quais são.</p>
+<p style="font-size:12px;color:#666;font-style:italic;margin:0 0 4px">O critério de definido pela FIFA para definir qual 3º colocado vai para cada confronto é complexo. Por isso, as escolhas dos placares da Segunda Fase são feitas considerando apenas as possíveis seleções para cada confronto — podendo ser redefinidas até 10 minutos antes de iniciar as partidas, já conhecendo as seleções classificadas.</p>
+`;
+
 
 function renderRules(){
   const el=document.getElementById('rules-content');
@@ -2598,6 +2734,7 @@ function renderRules(){
     const editSection=isAdmin?`
       <div style="margin-bottom:16px;display:flex;justify-content:flex-end">
         <button onclick="toggleRulesEdit()" id="rules-edit-btn" style="background:transparent;border:1px solid #1a5c2a;color:#1a5c2a;font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif">✏️ Editar</button>
+        <button onclick="restoreDefaultRules()" style="background:transparent;border:1px solid #888;color:#888;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif;margin-left:6px">↺ Restaurar padrão</button>
       </div>
       <div id="rules-editor" style="display:none;margin-bottom:16px">
                 <div style="display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:#f5faf6;border:1px solid var(--border);border-radius:8px 8px 0 0;border-bottom:none">
@@ -2642,7 +2779,7 @@ function renderRules(){
           <div style="display:flex;justify-content:space-between"><span>${sl.r16||'Oitavas (slot correto)'}</span><span style="color:#1a5c2a;font-weight:700">${sc.r16||8} pts</span></div>
           <div style="display:flex;justify-content:space-between"><span>${sl.qf||'Quartas (slot correto)'}</span><span style="color:#1a5c2a;font-weight:700">${sc.qf||10} pts</span></div>
           <div style="display:flex;justify-content:space-between"><span>${sl.sf||'Semifinal (slot correto)'}</span><span style="color:#1a5c2a;font-weight:700">${sc.sf||12} pts</span></div>
-          <div style="display:flex;justify-content:space-between"><span>Disputa 3º Lugar (slot correto)</span><span style="color:#1a5c2a;font-weight:700">${sc.tp||sc.sf||12} pts</span></div>
+          <div style="display:flex;justify-content:space-between"><span>${sl.tp||'Disputa de 3º Lugar (slot correto)'}</span><span style="color:#1a5c2a;font-weight:700">${sc.tp||sc.sf||12} pts</span></div>
           <div style="display:flex;justify-content:space-between"><span>${sl.f||'Final (slot correto)'}</span><span style="color:#1a5c2a;font-weight:700">${sc.f||15} pts</span></div>
         </div>
         <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Palpites Especiais</div>
@@ -2685,6 +2822,14 @@ function cancelRulesEdit(){
   if(display) display.style.display='';
   const btn=document.getElementById('rules-edit-btn');
   if(btn) btn.textContent='✏️ Editar';
+}
+
+function restoreDefaultRules(){
+  if(!confirm('Substituir o regulamento atual pelo texto padrão?')) return;
+  DB.collection('bolao').doc('rules').set({text: DEFAULT_RULES}).then(()=>{
+    showToast('Regulamento restaurado!','success');
+    renderRules();
+  }).catch(()=>showToast('Erro ao restaurar','error'));
 }
 
 function saveRules(){
@@ -3518,23 +3663,27 @@ function saveLockMode(){
   S.lockMode = mode;
   const dlInp = document.getElementById('global-lock-deadline');
   const wrap = document.getElementById('global-deadline-wrap');
+  const beforeWrap = document.getElementById('before-minutes-wrap');
   const statusEl = document.getElementById('global-lock-status');
+  if(wrap) wrap.style.display = mode==='global' ? 'flex' : 'none';
+  if(beforeWrap) beforeWrap.style.display = mode==='before' ? 'flex' : 'none';
   if(mode==='global'){
-    if(wrap) wrap.style.display='flex';
     const dl = dlInp ? dlInp.value : '';
     S.globalLockDeadline = dl;
     if(dl && statusEl){
       const dt = new Date(dl+':00-03:00');
       const now = new Date();
       if(now >= dt) statusEl.textContent = '🔒 Prazo já passou — todos fechados';
-      else {
-        const diff = Math.round((dt-now)/60000);
-        statusEl.textContent = `⏳ Fecha em ${diff} minuto(s)`;
-      }
+      else { const diff = Math.round((dt-now)/60000); statusEl.textContent = `⏳ Fecha em ${diff} minuto(s)`; }
     }
-  } else {
-    if(wrap) wrap.style.display='none';
+  } else if(mode==='before'){
+    const mins = +(document.getElementById('lock-minutes-before')||{value:30}).value||30;
+    S.minutesBefore = mins;
     S.globalLockDeadline = '';
+    if(statusEl) statusEl.textContent='';
+  } else {
+    S.globalLockDeadline = '';
+    S.minutesBefore = 30;
     if(statusEl) statusEl.textContent='';
   }
   persist();
@@ -3549,10 +3698,14 @@ function renderAdminStatus(){
   const radios = document.querySelectorAll('input[name="lock-mode"]');
   radios.forEach(r=>{ r.checked = (r.value===mode); });
   const wrap = document.getElementById('global-deadline-wrap');
+  const beforeWrap = document.getElementById('before-minutes-wrap');
   const dlInp = document.getElementById('global-lock-deadline');
+  const minsInp = document.getElementById('lock-minutes-before');
   const statusEl = document.getElementById('global-lock-status');
   if(wrap) wrap.style.display = mode==='global' ? 'flex' : 'none';
+  if(beforeWrap) beforeWrap.style.display = mode==='before' ? 'flex' : 'none';
   if(dlInp && S.globalLockDeadline) dlInp.value = S.globalLockDeadline;
+  if(minsInp) minsInp.value = S.minutesBefore||30;
   if(statusEl && mode==='global' && S.globalLockDeadline){
     const dt = new Date(S.globalLockDeadline+':00-03:00');
     const now = new Date();
@@ -3584,21 +3737,31 @@ function renderAdminStatus(){
   if(!el) return;
   const ps=S.users.filter(u=>!u.isAdmin);
   if(!ps.length){ el.innerHTML='<div class="empty-state"><span class="empty-icon">📊</span>Nenhum participante cadastrado.</div>'; return; }
-  el.innerHTML=ps.map(u=>{
+  // Load rulesAccepted from each user's own doc
+  Promise.all(ps.map(u=>DB.collection('bolao').doc('user_'+u.id).get().catch(()=>null))).then(docs=>{
+    docs.forEach((doc,i)=>{
+      if(doc&&doc.exists&&doc.data().rulesAccepted) ps[i].rulesAccepted=true;
+    });
+    el.innerHTML=ps.map(u=>{
     const bets=S.bets[u.id]||{};
     const firstM=MATCHES[0];
     const hasFirst=bets[firstM.id]&&bets[firstM.id].home!=null;
     const cls=S.classes[u.id]||{};
     const allCls=GROUPS.every(g=>cls[g]&&cls[g].pos1&&cls[g].pos2&&cls[g].pos3);
     const ok=hasFirst&&allCls;
+    const rulesOk=u.rulesAccepted===true;
     return `<div class="status-row">
       <div>
         <div style="font-size:14px;font-weight:600;color:var(--text-primary)">${u.name}</div>
         <div style="font-size:11px;color:var(--text-muted)">@${u.login} · ${totalPts(u.id)} pts</div>
       </div>
-      <span style="font-size:22px">${ok?'✅':'⏳'}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span title="${rulesOk?'Leu o regulamento':'Ainda não leu o regulamento'}" style="font-size:18px">${rulesOk?'📋✅':'📋⬜'}</span>
+        <span style="font-size:22px">${ok?'✅':'⏳'}</span>
+      </div>
     </div>`;
   }).join('');
+  }); // end Promise.all
 }
 
 // ============================================================
