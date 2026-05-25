@@ -3036,7 +3036,7 @@ function champPicksBlock(uid){
       ${!locked ? `<div style="text-align:center;margin-bottom:8px"><button class="see-bets-btn" onclick="saveAllBets()" style="border-color:var(--green-dim);color:var(--green-light)">💾 Salvar</button></div>` : ''}
       ${rows}
       ${locked?'<div class="deadline-passed-notice" style="margin-top:6px">⏳ Prazo encerrado</div>':''}
-      <button class="see-bets-btn" style="margin-top:8px;width:100%;text-align:center" onclick="toggleChampBets(this)">👁 Ver palpites</button>
+      ${(S.closedMatches||[]).length>0 ? `<button class="see-bets-btn" style="margin-top:8px;width:100%;text-align:center" onclick="toggleChampBets(this)">👁 Ver palpites</button>` : ''}
       <div class="bets-panel" id="champ-bets-panel"></div>
     </div>
   </div>`;
