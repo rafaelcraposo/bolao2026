@@ -979,6 +979,10 @@ async function hydrateUserData(uid){
       const bets=S.bets[uid]||{};
       Object.keys(bets).forEach(mid=>{ snap[mid]=bets[mid]; });
       try{ localStorage.setItem('bolao26_bets_snap_'+uid, JSON.stringify(snap)); }catch(e){}
+      // Seed rulesAccepted from Firebase so it persists across devices/logins
+      if(d.rulesAccepted===true){
+        try{ localStorage.setItem('bolao26_rules_accepted_'+uid,'1'); }catch(e){}
+      }
     }
   } catch(e){ console.error('hydrateUserData error', e); }
 }
