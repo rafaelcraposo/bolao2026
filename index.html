@@ -2259,7 +2259,7 @@ function toggleBets(mid, btn){
 }
 
 function buildBetsPanel(mid){
-  const participants=S.users.filter(u=>!u.isAdmin);
+  const participants=S.users.filter(u=>!u.isAdmin).sort((a,b)=>a.name.localeCompare(b.name,"pt"));
   if(!participants.length) return '<div style="color:var(--text-muted);font-size:12px;padding:6px 0">Nenhum participante.</div>';
   const match=MATCHES.find(m=>m.id===mid);
   const real=S.realScores[mid];
