@@ -1305,6 +1305,45 @@ function renderPicksByParticipant(){
     });
     html+=`</div>
       <div style="border-top:1px solid var(--border);margin:8px 0 6px"></div>
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600">3ºs Classificados</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">
+        ${(()=>{
+          const t=S.classes[u.id]||{};
+          const picks=Object.values(t['_thirds']||{}).filter(Boolean);
+          if(!picks.length) return '<span style="font-size:10px;color:var(--text-muted)">—</span>';
+          return picks.map(code=>{
+            const flag=S.flags[code]?`<img src="${S.flags[code]}" style="width:14px;height:10px;object-fit:contain;border-radius:1px;vertical-align:middle">` :'';
+            return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--text-secondary);background:var(--bg-card2);border:1px solid var(--border);border-radius:3px;padding:1px 5px">${flag}${TN(code)||code}</span>`;
+          }).join('');
+        })()}
+      </div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 6px"></div>
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600">Mata-Mata</div>
+      <div style="display:flex;flex-direction:column;gap:0px">
+        ${['Oitavas de Final','Quartas de Final','Semifinais','Disputa de 3º Lugar','Final'].flatMap(phase=>{
+          const kms=MATCHES.filter(m=>m.phase===phase);
+          return kms.map(m=>{
+            const kp=(S.koPicks[u.id]||{})[m.id]||{};
+            const home=kp.home||''; const away=kp.away||'';
+            const slotLabel=S.slotNames&&S.slotNames[m.id]?S.slotNames[m.id]:(m.slot||m.id);
+            const adminH=(S.koTeams&&S.koTeams[m.id])||{};
+            const realH=adminH.home||''; const realA=adminH.away||'';
+            const hCode=Object.keys(TEAMS).find(k=>TN(k)===home||k===home);
+            const aCode=Object.keys(TEAMS).find(k=>TN(k)===away||k===away);
+            const hFlag=hCode&&S.flags[hCode]?`<img src="${S.flags[hCode]}" style="width:14px;height:10px;object-fit:contain;border-radius:1px;vertical-align:middle">` :'';
+            const aFlag=aCode&&S.flags[aCode]?`<img src="${S.flags[aCode]}" style="width:14px;height:10px;object-fit:contain;border-radius:1px;vertical-align:middle">` :'';
+            return `<div style="display:grid;grid-template-columns:110px 14px 70px 10px 14px 1fr;align-items:center;gap:3px;font-size:10px;color:var(--text-secondary);min-height:20px">
+              <span style="color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${slotLabel.replace('Disputa de 3º Lugar','Disputa de 3º')}:</span>
+              <span style="text-align:center">${hFlag}</span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${home||'—'}</span>
+              <span style="color:var(--text-muted);text-align:center">×</span>
+              <span style="text-align:center">${aFlag}</span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${away||'—'}</span>
+            </div>`;
+          });
+        }).join('')}
+      </div>
+      <div style="border-top:1px solid var(--border);margin:8px 0 6px"></div>
       <div style="display:flex;flex-direction:column;gap:3px">
         ${champSlots.map(s=>{
           const pick=cp[s.key]||'';
@@ -1356,6 +1395,12 @@ function renderPicks(){
     </div>`;
   });
 
+  // 3ºs Classificados
+  html+=buildThirdsPicksPanel();
+
+  // KO phase picks (Oitavas → Final)
+  html+=buildKOPicksPanel();
+
   // Champ/Vice/3º/4º picks
   html+=`<div class="phase-section">
     <div class="phase-header"><div class="phase-title">🏆 CAMPEÃO / VICE / 3º / 4º</div><div class="phase-line"></div></div>
@@ -1363,6 +1408,117 @@ function renderPicks(){
   </div>`;
 
   container.innerHTML=html;
+}
+
+function buildThirdsPicksPanel(){
+  const participants=S.users.filter(u=>!u.isAdmin);
+  if(!participants.length) return '';
+
+  // Tally all _thirds picks across participants
+  const tally={};
+  const voters={};
+  participants.forEach(u=>{
+    const picks=Object.values((S.classes[u.id]||{})['_thirds']||{}).filter(Boolean);
+    picks.forEach(code=>{
+      tally[code]=(tally[code]||0)+1;
+      if(!voters[code]) voters[code]=[];
+      voters[code].push(u.name);
+    });
+  });
+
+  const sorted=Object.entries(tally).sort((a,b)=>b[1]-a[1]);
+  if(!sorted.length) return '';
+
+  let inner='';
+  inner+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">`;
+  sorted.forEach(([code,count])=>{
+    const pid=`thirds_${code.replace(/[^a-zA-Z0-9]/g,'_')}`;
+    const flagEl=S.flags[code]
+      ?`<div class="team-flag-wrap" style="width:18px;height:12px;flex-shrink:0"><img src="${S.flags[code]}" style="width:100%;height:100%;object-fit:cover"></div>`
+      :`<span style="font-size:11px;flex-shrink:0">🏳</span>`;
+    const names=(voters[code]||[]).slice().sort((a,b)=>a.localeCompare(b,'pt'));
+    inner+=`<div style="display:flex;flex-direction:column">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:5px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;overflow:hidden" onclick="togglePickPanel('${pid}',this.parentElement.querySelector('.pick-expand'))">
+        ${flagEl}
+        <span style="font-size:11px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${TN(code)||code}</span>
+        <span style="color:var(--gold);font-family:Bebas Neue,sans-serif;font-size:14px;flex-shrink:0">${count}</span>
+        <span style="color:var(--text-muted);font-size:9px;flex-shrink:0">▼</span>
+      </div>
+      <div class="pick-expand" id="${pid}" style="display:none;background:var(--bg-card2);border:1px solid var(--border);border-top:none;border-radius:0 0 5px 5px;padding:4px 8px">
+        ${names.map(n=>`<div style="font-size:10px;color:var(--text-secondary);padding:1px 0">• ${n}</div>`).join('')}
+      </div>
+    </div>`;
+  });
+  inner+=`</div>`;
+
+  return `<div class="phase-section">
+    <div class="phase-header"><div class="phase-title">3ºS CLASSIFICADOS</div><div class="phase-line"></div></div>
+    <div class="match-card" style="padding:10px 12px">${inner}</div>
+  </div>`;
+}
+
+function buildKOPicksPanel(){
+  const participants=S.users.filter(u=>!u.isAdmin);
+  if(!participants.length) return '';
+  const phases=['Oitavas de Final','Quartas de Final','Semifinais','Disputa de 3º Lugar','Final'];
+  let html='';
+  phases.forEach(phase=>{
+    const kms=MATCHES.filter(m=>m.phase===phase);
+    if(!kms.length) return;
+    let phaseHtml='';
+    kms.forEach(m=>{
+      const slotLabel=S.slotNames&&S.slotNames[m.id]?S.slotNames[m.id]:(m.slot||m.id);
+      // Tally home picks
+      const homeTally={}, awayTally={}, homeVoters={}, awayVoters={};
+      participants.forEach(u=>{
+        const kp=(S.koPicks[u.id]||{})[m.id]||{};
+        if(kp.home){ homeTally[kp.home]=(homeTally[kp.home]||0)+1; if(!homeVoters[kp.home]) homeVoters[kp.home]=[]; homeVoters[kp.home].push(u.name); }
+        if(kp.away){ awayTally[kp.away]=(awayTally[kp.away]||0)+1; if(!awayVoters[kp.away]) awayVoters[kp.away]=[]; awayVoters[kp.away].push(u.name); }
+      });
+      const homeSorted=Object.entries(homeTally).sort((a,b)=>b[1]-a[1]);
+      const awaySorted=Object.entries(awayTally).sort((a,b)=>b[1]-a[1]);
+      if(!homeSorted.length&&!awaySorted.length) return;
+
+      function teamCard(team,count,voters,side){
+        const pid=`ko_${m.id}_${side}_${team.replace(/[^a-zA-Z0-9]/g,'_')}`;
+        const code=Object.keys(TEAMS).find(k=>TN(k)===team||k===team);
+        const flagEl=code?`<div class="team-flag-wrap" style="width:18px;height:12px;flex-shrink:0">${FE(code)}</div>`:`<span style="font-size:11px;flex-shrink:0">🏳</span>`;
+        const names=(voters||[]).slice().sort((a,b)=>a.localeCompare(b,'pt'));
+        return `<div style="display:flex;flex-direction:column">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:5px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;gap:5px;overflow:hidden" onclick="togglePickPanel('${pid}',this.parentElement.querySelector('.pick-expand'))">
+            ${flagEl}
+            <span style="font-size:11px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${TN(team)||team}</span>
+            <span style="color:var(--gold);font-family:Bebas Neue,sans-serif;font-size:14px;flex-shrink:0">${count}</span>
+            <span style="color:var(--text-muted);font-size:9px;flex-shrink:0">▼</span>
+          </div>
+          <div class="pick-expand" id="${pid}" style="display:none;background:var(--bg-card2);border:1px solid var(--border);border-top:none;border-radius:0 0 5px 5px;padding:4px 8px">
+            ${names.map(n=>`<div style="font-size:10px;color:var(--text-secondary);padding:1px 0">• ${n}</div>`).join('')}
+          </div>
+        </div>`;
+      }
+
+      phaseHtml+=`<div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600">${slotLabel}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:2px">
+          <div>
+            <div style="font-size:9px;color:var(--text-muted);margin-bottom:3px;text-transform:uppercase">Casa</div>
+            <div style="display:flex;flex-direction:column;gap:3px">${homeSorted.map(([t,c])=>teamCard(t,c,homeVoters[t],'h')).join('')}</div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--text-muted);margin-bottom:3px;text-transform:uppercase">Fora</div>
+            <div style="display:flex;flex-direction:column;gap:3px">${awaySorted.map(([t,c])=>teamCard(t,c,awayVoters[t],'a')).join('')}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    if(phaseHtml){
+      html+=`<div class="phase-section">
+        <div class="phase-header"><div class="phase-title">${phase.toUpperCase()}</div><div class="phase-line"></div></div>
+        <div class="match-card" style="padding:10px 12px">${phaseHtml}</div>
+      </div>`;
+    }
+  });
+  return html;
 }
 
 function buildGroupPicksPanel(group){
