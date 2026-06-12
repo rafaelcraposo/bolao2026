@@ -944,9 +944,10 @@ async function persist(){
       const currentCount = Object.keys(currentBets).length;
 
       // Never overwrite existing bets with empty — keep Firebase data if local is empty
+      // But if local has data, always trust local (it's more recent)
       const safeBets = (currentCount === 0 && existingCount > 0)
         ? existingBets
-        : Object.assign({}, existingBets, currentBets);
+        : Object.assign({}, existingBets, currentBets); // local wins on conflict
 
       const userOnly = {
         bets: { [uid]: safeBets },
@@ -1215,6 +1216,8 @@ async function doLogin(){
   }).catch(e=>console.error('Background load error',e));
 }
 function doLogout(){
+  S._adminBypassLock=false;
+  adminEditUid=null;
   S.currentUser=null;
   try{ localStorage.removeItem('bolao26_s'); }catch(e){}
   document.getElementById('app-screen').classList.remove('active');
@@ -1237,6 +1240,8 @@ document.getElementById('login-pass').onkeydown=e=>{ if(e.key==='Enter') doLogin
 // TABS
 // ============================================================
 function showTab(tab){
+  // Reset admin edit bypass when leaving admin tab
+  if(tab !== 'admin'){ S._adminBypassLock=false; adminEditUid=null; }
   const anyLocked=MATCHES.some(m=>isLocked(m));
   const picksLocked=isPicksLocked();
   const picksBtn=document.getElementById('nav-picks');
@@ -1275,9 +1280,11 @@ function showAdminSub(sub, btn){
   document.querySelectorAll('.admin-tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('admin-'+sub).classList.add('active');
   btn.classList.add('active');
-  if(sub==='matches') renderAdminMatchesList(null);
-  if(sub==='flags') renderAdminFlags();
-  if(sub==='status') renderAdminStatus();
+  if(sub==='matches') { S._adminBypassLock=false; renderAdminMatchesList(null); }
+  if(sub==='flags')   { S._adminBypassLock=false; renderAdminFlags(); }
+  if(sub==='status')  { S._adminBypassLock=false; renderAdminStatus(); }
+  if(sub==='scoring') { S._adminBypassLock=false; }
+  if(sub==='participants') { S._adminBypassLock=false; }
   if(sub==='editpicks') initAdminEditPicks();
 }
 
@@ -1312,7 +1319,7 @@ function renderAdminEditPicks(){
   const fakeUser=S.users.find(u=>u.id===adminEditUid);
   if(!fakeUser) return;
 
-  // Temporarily become the participant so all rendering works correctly
+  // Set bypass mode permanently while admin edit panel is open
   S.currentUser=fakeUser;
   S._adminBypassLock=true;
 
@@ -1347,28 +1354,35 @@ function renderAdminEditPicks(){
   attachMatchListeners(container, uid);
   updateCountdowns();
 
-  // Restore admin
+  // Restore admin as currentUser but keep bypass active while panel is open
   S.currentUser=realUser;
-  S._adminBypassLock=false;
+  // _adminBypassLock stays true — reset only when exiting edit mode
 }
 
 function saveAdminEditPicks(){
   if(!adminEditUid){ showToast('Selecione um participante primeiro.','error'); return; }
   const uid=adminEditUid;
   const name=S.users.find(u=>u.id===uid)?.name||uid;
+  // Force-write: use set() without merge so admin edits always win
   const userOnly={
     bets:{ [uid]: (S.bets||{})[uid]||{} },
     classes:{ [uid]: (S.classes||{})[uid]||{} },
     koPicks:{ [uid]: (S.koPicks||{})[uid]||{} },
     champPicks:{ [uid]: (S.champPicks||{})[uid]||{} },
+    rulesAccepted: true,
   };
-  USER_DOC(uid).set(userOnly,{merge:true})
-    .then(()=>showToast(`Palpites de ${name} salvos com sucesso!`,'success'))
+  USER_DOC(uid).set(userOnly, {merge:true})
+    .then(()=>{
+      // Also update hydrateUserData snapshot so next persist() doesn't revert
+      try{ localStorage.setItem('bolao26_bets_snap_'+uid, JSON.stringify((S.bets||{})[uid]||{})); }catch(e){}
+      showToast(`Palpites de ${name} salvos com sucesso!`,'success');
+    })
     .catch(()=>showToast('❌ Erro ao salvar','error'));
 }
 
 function exitAdminEditMode(){
   adminEditUid=null;
+  S._adminBypassLock=false;
   const container=document.getElementById('admin-edit-picks-container');
   if(container) container.innerHTML='';
   const sel=document.getElementById('admin-edit-participant-sel');
@@ -3131,6 +3145,13 @@ function saveRules(){
 
 function saveAllBets(){
   const uid=S.currentUser.id;
+
+  // Admin edit mode: bypass all restrictions, save directly
+  if(S._adminBypassLock && adminEditUid){
+    saveAdminEditPicks();
+    return;
+  }
+
   const currentBets=(S.bets[uid]||{});
 
   // Protection: don't save if local bets are empty — likely a loading race condition
