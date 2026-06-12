@@ -462,6 +462,7 @@ body { overflow-x: hidden; }
         <button class="admin-tab" onclick="showAdminSub('flags',this)">🚩 Bandeiras</button>
         <button class="admin-tab" onclick="showAdminSub('scoring',this)">🏆 Pontuação</button>
         <button class="admin-tab" onclick="showAdminSub('status',this)">⚙️ Geral</button>
+        <button class="admin-tab" onclick="showAdminSub('editpicks',this)">✏️ Editar Palpites</button>
       </div>
 
       <!-- PARTICIPANTS -->
@@ -600,6 +601,22 @@ body { overflow-x: hidden; }
         <div class="admin-section">
           <div class="admin-section-title">📊 Status dos Participantes</div>
           <div id="status-list"></div>
+        </div>
+      </div>
+
+      <!-- EDITAR PALPITES -->
+      <div id="admin-editpicks" class="admin-sub">
+        <div class="admin-section">
+          <div class="admin-section-title">✏️ Editar Palpites de Participante</div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Selecione um participante para editar todos os palpites dele sem restrição de prazo.</p>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+            <select id="admin-edit-participant-sel" class="admin-input" style="max-width:260px" onchange="loadAdminEditPicks()">
+              <option value="">— Selecionar participante —</option>
+            </select>
+            <button class="admin-btn" onclick="saveAdminEditPicks()" style="background:#1a5c2a;color:#fff">💾 Salvar palpites</button>
+            <button onclick="exitAdminEditMode()" style="background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:12px;padding:6px 12px;border-radius:6px;cursor:pointer">✕ Sair</button>
+          </div>
+          <div id="admin-edit-picks-container"></div>
         </div>
       </div>
     </div>
@@ -914,14 +931,25 @@ async function persist(){
       await SHARED_DOC().set(shared, {merge:true});
     }
 
-    // Save per-user data
-    if(S.currentUser){
-      const userData = {};
-      USER_FIELDS.forEach(k => userData[k] = S[k]||{});
-      // Only save this user's data
+    // Save per-user data — with protection against overwriting existing data with empty state
+    if(S.currentUser && !S.currentUser.isAdmin){
       const uid = S.currentUser.id;
+      const currentBets = (S.bets||{})[uid]||{};
+
+      // Safety: read existing Firebase data before saving
+      const existingDoc = await USER_DOC(uid).get();
+      const existing = existingDoc.exists ? existingDoc.data() : {};
+      const existingBets = (existing.bets && existing.bets[uid])||{};
+      const existingCount = Object.keys(existingBets).length;
+      const currentCount = Object.keys(currentBets).length;
+
+      // Never overwrite existing bets with empty — keep Firebase data if local is empty
+      const safeBets = (currentCount === 0 && existingCount > 0)
+        ? existingBets
+        : Object.assign({}, existingBets, currentBets);
+
       const userOnly = {
-        bets: { [uid]: (S.bets||{})[uid]||{} },
+        bets: { [uid]: safeBets },
         classes: { [uid]: (S.classes||{})[uid]||{} },
         koPicks: { [uid]: (S.koPicks||{})[uid]||{} },
         champPicks: { [uid]: (S.champPicks||{})[uid]||{} },
@@ -1029,6 +1057,7 @@ function getMeta(m){
 
 function isDeadline(){ return new Date() > DEADLINE; }
 function isLocked(m){
+  if(S._adminBypassLock) return false;
   if(S.forceLocked) return true;
   if(S.lockMode==='global' && S.globalLockDeadline){
     return new Date() >= new Date(S.globalLockDeadline+':00-03:00');
@@ -1249,6 +1278,101 @@ function showAdminSub(sub, btn){
   if(sub==='matches') renderAdminMatchesList(null);
   if(sub==='flags') renderAdminFlags();
   if(sub==='status') renderAdminStatus();
+  if(sub==='editpicks') initAdminEditPicks();
+}
+
+// ============================================================
+// ADMIN EDIT PICKS MODE
+// ============================================================
+let adminEditUid = null;
+
+function initAdminEditPicks(){
+  const sel=document.getElementById('admin-edit-participant-sel');
+  if(!sel) return;
+  const ps=S.users.filter(u=>!u.isAdmin).sort((a,b)=>a.name.localeCompare(b.name,'pt'));
+  sel.innerHTML='<option value="">— Selecionar participante —</option>'+
+    ps.map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+  if(adminEditUid){ sel.value=adminEditUid; loadAdminEditPicks(); }
+}
+
+function loadAdminEditPicks(){
+  const sel=document.getElementById('admin-edit-participant-sel');
+  const uid=sel?sel.value:'';
+  if(!uid){ document.getElementById('admin-edit-picks-container').innerHTML=''; adminEditUid=null; return; }
+  adminEditUid=uid;
+  renderAdminEditPicks();
+}
+
+function renderAdminEditPicks(){
+  if(!adminEditUid) return;
+  const container=document.getElementById('admin-edit-picks-container');
+  if(!container) return;
+
+  const realUser=S.currentUser;
+  const fakeUser=S.users.find(u=>u.id===adminEditUid);
+  if(!fakeUser) return;
+
+  // Temporarily become the participant so all rendering works correctly
+  S.currentUser=fakeUser;
+  S._adminBypassLock=true;
+
+  const uid=adminEditUid;
+  const bets=S.bets[uid]||{};
+  let html='';
+
+  GROUPS.forEach(g=>{
+    const gmatches=MATCHES.filter(m=>m.group===g).sort((a,b)=>{
+      const ma=getMeta(a),mb=getMeta(b);
+      const da=ma.date&&ma.time?new Date(`${ma.date}T${ma.time}:00`):new Date('9999-01-01');
+      const db=mb.date&&mb.time?new Date(`${mb.date}T${mb.time}:00`):new Date('9999-01-01');
+      return da-db;
+    });
+    if(!gmatches.length) return;
+    html+=`<div class="phase-section"><div class="phase-header"><div class="phase-title">GRUPO ${g}</div><div class="phase-line"></div></div>`;
+    gmatches.forEach(m=>{ html+=matchCard(m, bets, uid); });
+    html+=groupClassCard(g, uid);
+    html+=`</div>`;
+  });
+  html+=thirdPlaceCard(uid);
+  KO_PHASES.forEach(phase=>{
+    const kms=MATCHES.filter(m=>m.phase===phase);
+    if(!kms.length) return;
+    html+=`<div class="phase-section"><div class="phase-header"><div class="phase-title">${phase.toUpperCase()}</div><div class="phase-line"></div></div>`;
+    kms.forEach(m=>{ html+=koCard(m, uid); });
+    html+=`</div>`;
+  });
+  html+=champPicksBlock(uid);
+
+  container.innerHTML=html;
+  attachMatchListeners(container, uid);
+  updateCountdowns();
+
+  // Restore admin
+  S.currentUser=realUser;
+  S._adminBypassLock=false;
+}
+
+function saveAdminEditPicks(){
+  if(!adminEditUid){ showToast('Selecione um participante primeiro.','error'); return; }
+  const uid=adminEditUid;
+  const name=S.users.find(u=>u.id===uid)?.name||uid;
+  const userOnly={
+    bets:{ [uid]: (S.bets||{})[uid]||{} },
+    classes:{ [uid]: (S.classes||{})[uid]||{} },
+    koPicks:{ [uid]: (S.koPicks||{})[uid]||{} },
+    champPicks:{ [uid]: (S.champPicks||{})[uid]||{} },
+  };
+  USER_DOC(uid).set(userOnly,{merge:true})
+    .then(()=>showToast(`Palpites de ${name} salvos com sucesso!`,'success'))
+    .catch(()=>showToast('❌ Erro ao salvar','error'));
+}
+
+function exitAdminEditMode(){
+  adminEditUid=null;
+  const container=document.getElementById('admin-edit-picks-container');
+  if(container) container.innerHTML='';
+  const sel=document.getElementById('admin-edit-participant-sel');
+  if(sel) sel.value='';
 }
 
 let _picksView='selections';
@@ -2379,6 +2503,7 @@ function showLoadingOverlay(show){
 // ============================================================
 let _unsaved=false;
 function hasAcceptedRules(){
+  if(S._adminBypassLock) return true;
   const uid=S.currentUser&&S.currentUser.id;
   if(!uid) return false;
   return localStorage.getItem('bolao26_rules_accepted_'+uid)==='1';
@@ -3005,6 +3130,14 @@ function saveRules(){
 }
 
 function saveAllBets(){
+  const uid=S.currentUser.id;
+  const currentBets=(S.bets[uid]||{});
+
+  // Protection: don't save if local bets are empty — likely a loading race condition
+  if(Object.keys(currentBets).length===0){
+    showToast('⚠️ Nenhum palpite encontrado. Recarregue a página antes de salvar.','error');
+    return;
+  }
 
   // Before saving, check for any locked match that the user may have edited
   // We do this by re-evaluating isLocked at save time (server clock agnostic — uses client time)
@@ -3778,6 +3911,7 @@ function updateRevealStatus(){
 // ADMIN — STATUS
 // ============================================================
 function isPicksLocked(){
+  if(S._adminBypassLock) return false;
   if(S.picksLockMode==='deadline' && S.picksLockDeadline){
     return new Date() >= new Date(S.picksLockDeadline+':00-03:00');
   }
