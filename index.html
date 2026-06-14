@@ -1207,12 +1207,11 @@ async function doLogin(){
   FB_READY.then(async ()=>{
     await hydrateShared();
     await hydrateUserData(user.id);
+    await hydrateAllUsers(); // wait for all bets before rendering
     subscribeShared();
     renderMatches();
     renderRanking();
     if(user.isAdmin) renderAdminStatus();
-    // Load all other users in background (non-blocking)
-    hydrateAllUsers().catch(e=>console.error('hydrateAllUsers error',e));
   }).catch(e=>console.error('Background load error',e));
 }
 function doLogout(){
@@ -2390,9 +2389,20 @@ function toggleBets(mid, btn){
     panel.classList.remove('open'); panel.innerHTML='';
     btn.textContent='👁 Palpites';
   } else {
-    panel.innerHTML=buildBetsPanel(mid);
     panel.classList.add('open');
     btn.textContent='Minimizar'; btn.style.color='#1a5c2a'; btn.style.borderColor='#1a5c2a';
+    // Fetch fresh bets from Firebase for all participants before rendering
+    const ps=S.users.filter(u=>!u.isAdmin);
+    panel.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:8px 0;text-align:center">Carregando...</div>';
+    Promise.all(ps.map(u=>USER_DOC(u.id).get().catch(()=>null))).then(docs=>{
+      docs.forEach((doc,i)=>{
+        if(doc&&doc.exists){
+          const d=doc.data();
+          if(d.bets&&d.bets[ps[i].id]) Object.assign(S.bets[ps[i].id]||(S.bets[ps[i].id]={}), d.bets[ps[i].id]);
+        }
+      });
+      panel.innerHTML=buildBetsPanel(mid);
+    }).catch(()=>{ panel.innerHTML=buildBetsPanel(mid); });
   }
 }
 
@@ -2559,11 +2569,13 @@ function clearUnsaved(){
 
 // Countdown timers: update every second
 function updateCountdowns(){
+  let needsRefresh=false;
   document.querySelectorAll('.match-countdown').forEach(el=>{
     const dt=new Date(el.dataset.dt);
     const now=new Date();
     const diff=dt-now;
-    if(diff<=0||diff>86400000){ el.textContent=''; return; }
+    if(diff<=0){ if(el.textContent!=='') needsRefresh=true; el.textContent=''; return; }
+    if(diff>86400000){ el.textContent=''; return; }
     const totalSec=Math.floor(diff/1000);
     const h=Math.floor(totalSec/3600);
     const m=Math.floor((totalSec%3600)/60);
@@ -2572,6 +2584,10 @@ function updateCountdowns(){
     el.textContent=`${pad(h)}:${pad(m)}:${pad(s)}`;
     el.style.color=diff<=3600000?'#ff5050':'';
   });
+  // When a match just locked, refresh all bets from Firebase then re-render
+  if(needsRefresh){
+    hydrateAllUsers().then(()=>renderMatches()).catch(()=>renderMatches());
+  }
 }
 setInterval(updateCountdowns, 1000);
 
