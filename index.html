@@ -1442,15 +1442,28 @@ function renderPicksByParticipant(){
     });
     html+=`</div>
       <div style="border-top:1px solid var(--border);margin:8px 0 6px"></div>
-      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600">3ºs Classificados</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">3ºs Classificados</div>
+        ${(()=>{
+          const realThirds=S.realThirds||[];
+          if(!realThirds.length) return '';
+          const picks=Object.values((S.classes[u.id]||{})['_thirds']||{}).filter(Boolean);
+          const hits=picks.filter(code=>realThirds.includes(code)).length;
+          const pts=hits*(S.scoring.s3||2);
+          return `<span style="font-size:10px;color:${hits>0?'var(--green-light)':'var(--text-muted)'};flex-shrink:0">${pts} pts</span>`;
+        })()}
+      </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">
         ${(()=>{
           const t=S.classes[u.id]||{};
           const picks=Object.values(t['_thirds']||{}).filter(Boolean);
+          const realThirds=S.realThirds||[];
           if(!picks.length) return '<span style="font-size:10px;color:var(--text-muted)">—</span>';
           return picks.map(code=>{
             const flag=S.flags[code]?`<img src="${S.flags[code]}" style="width:14px;height:10px;object-fit:contain;border-radius:1px;vertical-align:middle">` :'';
-            return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--text-secondary);background:var(--bg-card2);border:1px solid var(--border);border-radius:3px;padding:1px 5px">${flag}${TN(code)||code}</span>`;
+            const correct=realThirds.length&&realThirds.includes(code);
+            const wrong=realThirds.length&&!realThirds.includes(code);
+            return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--text-secondary);background:${correct?'rgba(26,92,42,0.1)':wrong?'rgba(192,32,32,0.1)':'var(--bg-card2)'};border:1px solid ${correct?'#1a5c2a':wrong?'#c0392b':'var(--border)'};border-radius:3px;padding:1px 5px">${flag}${TN(code)||code}</span>`;
           }).join('');
         })()}
       </div>
@@ -1458,24 +1471,38 @@ function renderPicksByParticipant(){
       <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600">Mata-Mata</div>
       <div style="display:flex;flex-direction:column;gap:0px">
         ${['Oitavas de Final','Quartas de Final','Semifinais','Disputa de 3º Lugar','Final'].flatMap(phase=>{
+          const phaseScoreKey={
+            'Oitavas de Final':'r16','Quartas de Final':'qf',
+            'Semifinais':'sf','Disputa de 3º Lugar':'tp','Final':'f'
+          }[phase]||'r16';
           const kms=MATCHES.filter(m=>m.phase===phase);
           return kms.map(m=>{
             const kp=(S.koPicks[u.id]||{})[m.id]||{};
             const home=kp.home||''; const away=kp.away||'';
             const slotLabel=S.slotNames&&S.slotNames[m.id]?S.slotNames[m.id]:(m.slot||m.id);
-            const adminH=(S.koTeams&&S.koTeams[m.id])||{};
-            const realH=adminH.home||''; const realA=adminH.away||'';
+            const adminT=(S.koTeams&&S.koTeams[m.id])||{};
+            const realH=adminT.home||''; const realA=adminT.away||'';
             const hCode=Object.keys(TEAMS).find(k=>TN(k)===home||k===home);
             const aCode=Object.keys(TEAMS).find(k=>TN(k)===away||k===away);
             const hFlag=hCode&&S.flags[hCode]?`<img src="${S.flags[hCode]}" style="width:14px;height:10px;object-fit:contain;border-radius:1px;vertical-align:middle">` :'';
             const aFlag=aCode&&S.flags[aCode]?`<img src="${S.flags[aCode]}" style="width:14px;height:10px;object-fit:contain;border-radius:1px;vertical-align:middle">` :'';
-            return `<div style="display:grid;grid-template-columns:110px 14px 70px 10px 14px 1fr;align-items:center;gap:3px;font-size:10px;color:var(--text-secondary);min-height:20px">
+            const hasReal=realH||realA;
+            let ptsHtml='';
+            if(hasReal){
+              const hCorrect=home&&realH&&(home===realH||TN(hCode||'')===realH);
+              const aCorrect=away&&realA&&(away===realA||TN(aCode||'')===realA);
+              const slotPts=S.scoring[phaseScoreKey]||0;
+              const pts=(hCorrect&&aCorrect)?slotPts*2:(hCorrect||aCorrect)?slotPts:0;
+              ptsHtml=`<span style="color:${pts>0?'var(--green-light)':'var(--text-muted)'};font-size:10px;margin-left:4px;flex-shrink:0">${pts}pts</span>`;
+            }
+            return `<div style="display:grid;grid-template-columns:110px 14px 70px 10px 14px 1fr auto;align-items:center;gap:3px;font-size:10px;color:var(--text-secondary);min-height:20px">
               <span style="color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${slotLabel.replace('Disputa de 3º Lugar','Disputa de 3º')}:</span>
               <span style="text-align:center">${hFlag}</span>
               <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${home||'—'}</span>
               <span style="color:var(--text-muted);text-align:center">×</span>
               <span style="text-align:center">${aFlag}</span>
               <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${away||'—'}</span>
+              ${ptsHtml}
             </div>`;
           });
         }).join('')}
@@ -1486,7 +1513,16 @@ function renderPicksByParticipant(){
           const pick=cp[s.key]||'';
           const code=Object.keys(TEAMS).find(k=>TN(k)===pick||k===pick);
           const flag=code&&S.flags[code]?`<img src="${S.flags[code]}" style="width:16px;height:11px;object-fit:contain;border-radius:1px;vertical-align:middle">`:'';
-          return `<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-primary)"><span style="min-width:90px;display:inline-block;color:var(--text-muted)">${s.label}:</span>${flag}<strong>${pick||'—'}</strong></div>`;
+          const fr=S.finalResults||{};
+          const real=fr[s.key]||'';
+          let ptsHtml='';
+          if(real){
+            const correct=pick&&(pick===real||TN(code||'')===real);
+            const champScoreKey={champ:'champ',vice:'vice',third:'third',fourth:'fourth'}[s.key];
+            const pts=correct?(S.scoring[champScoreKey]||0):0;
+            ptsHtml=`<span style="color:${correct?'var(--green-light)':'var(--text-muted)'};font-size:10px;margin-left:auto;flex-shrink:0">${pts} pts</span>`;
+          }
+          return `<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-primary)"><span style="min-width:90px;display:inline-block;color:var(--text-muted)">${s.label}:</span>${flag}<strong style="flex:1">${pick||'—'}</strong>${ptsHtml}</div>`;
         }).join('')}
       </div>
     </div>`;
