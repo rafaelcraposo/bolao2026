@@ -2213,8 +2213,8 @@ function koCard(m, uid){
 
   const ptsBadge=totalKoPts!=null?'<span class="pts-badge" id="pts-'+m.id+'">'+totalKoPts+' pts</span>':'<span id="pts-'+m.id+'"></span>';
   const kdFmt=kd?new Date(kd+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):' — ';
-  const centerMeta=pickLocked
-    ? (locked?'<button class="see-bets-btn" onclick="toggleBets(\''+m.id+'\',this)">&#128065; Palpites</button>':'')
+  const centerMeta=locked
+    ? '<button class="see-bets-btn" onclick="toggleBets(\''+m.id+'\',this)">&#128065; Palpites</button>'
     : '<button class="see-bets-btn" onclick="saveAllBets()" style="border-color:var(--green-dim);color:var(--green-light)">&#128190; Salvar</button>';
 
   return '<div class="match-card'+(locked?' locked':'')+'">'+
