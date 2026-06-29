@@ -2522,9 +2522,9 @@ function buildBetsPanel(mid){
       if(ra && pa && pa===ra) slotPts+=roundPtsVal;
       if(pts!==null) pts+=slotPts;
       else if(slotPts>0) pts=slotPts;
-      // Flags from participant's pick
-      pickHomeFlag=flagByName(pick.home);
-      pickAwayFlag=flagByName(pick.away,true);
+      // Flags always show real teams, not participant's pick
+      pickHomeFlag=flagByName(realTeams.home);
+      pickAwayFlag=flagByName(realTeams.away,true);
     } else {
       pickHomeFlag=flagByCode(homeCode);
       pickAwayFlag=flagByCode(awayCode,true);
