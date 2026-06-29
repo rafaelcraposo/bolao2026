@@ -2173,6 +2173,12 @@ function koCard(m, uid){
         const code = Object.keys(TEAMS).find(k=>k===autoVal||TN(k)===autoVal);
         const displayName = code ? TN(code) : autoVal;
         const flagHtml = code ? FE(code) : '';
+        if(side==='away'){
+          return `<div id="auto_slot_${m.id}_${side}" style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#1a5c2a;justify-content:flex-end">
+            <span>${displayName}</span>
+            ${code?`<div class="team-flag-wrap" style="width:22px;height:15px;flex-shrink:0">${flagHtml}</div>`:''}
+          </div>`;
+        }
         return `<div id="auto_slot_${m.id}_${side}" style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#1a5c2a">
           ${code?`<div class="team-flag-wrap" style="width:22px;height:15px;flex-shrink:0">${flagHtml}</div>`:''}
           <span>${displayName}</span>
