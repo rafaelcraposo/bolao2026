@@ -2220,13 +2220,22 @@ function koCard(m, uid){
 
   const ptsBadge=totalKoPts!=null?'<span class="pts-badge" id="pts-'+m.id+'">'+totalKoPts+' pts</span>':'<span id="pts-'+m.id+'"></span>';
   const kdFmt=kd?new Date(kd+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):' — ';
+  let koCountdownHtml='';
+  if(!locked&&kd&&kt){
+    const matchMs=new Date(`${kd}T${kt}:00-03:00`).getTime();
+    const lockMs=S.lockMode==='before'?matchMs-(S.minutesBefore||30)*60000:matchMs;
+    const diffMs=lockMs-Date.now();
+    if(diffMs>0&&diffMs<=86400000){
+      koCountdownHtml=`<span class="match-countdown" data-dt="${new Date(lockMs).toISOString()}" style="font-size:10px;color:var(--text-muted);margin-left:6px"></span>`;
+    }
+  }
   const centerMeta=locked
     ? '<button class="see-bets-btn" onclick="toggleBets(\''+m.id+'\',this)">&#128065; Palpites</button>'
     : '<button class="see-bets-btn" onclick="saveAllBets()" style="border-color:var(--green-dim);color:var(--green-light)">&#128190; Salvar</button>';
 
   return '<div class="match-card'+(locked?' locked':'')+'">'+
     '<div class="match-meta">'+
-      '<div class="match-meta-left">'+kdFmt+' &middot; '+(kt||'—')+'</div>'+
+      '<div class="match-meta-left">'+kdFmt+' &middot; '+(kt||'—')+koCountdownHtml+'</div>'+
       '<div class="match-meta-center">'+centerMeta+'</div>'+
       '<div class="match-meta-right"><span class="match-status-badge '+(locked?'badge-locked':'badge-open')+'">'+(locked?'&#128274; Fechado':'&#9999;&#65039; Aberto')+'</span></div>'+
     '</div>'+
@@ -2943,14 +2952,22 @@ function renderNextMatches(){
       html+=`</div>`;
     });
     html+=thirdPlaceCard(uid);
-    KO_PHASES.forEach(phase=>{
-      const kms=MATCHES.filter(m=>m.phase===phase);
-      if(!kms.length) return;
-      html+=`<div class="phase-section">`;
-      html+=`<div class="phase-header"><div class="phase-title">${phase.toUpperCase()}</div><div class="phase-line"></div></div>`;
-      kms.forEach(m=>{ html+=koCard(m, uid); });
-      html+=`</div>`;
+    const koSorted=MATCHES.filter(m=>m.isKO).sort((a,b)=>{
+      const ma=getMeta(a),mb=getMeta(b);
+      const da=ma.date&&ma.time?new Date(`${ma.date}T${ma.time}:00`):new Date('9999-01-01');
+      const db=mb.date&&mb.time?new Date(`${mb.date}T${mb.time}:00`):new Date('9999-01-01');
+      return da-db;
     });
+    let lastPhase='';
+    koSorted.forEach(m=>{
+      if(m.phase!==lastPhase){
+        if(lastPhase) html+=`</div>`;
+        html+=`<div class="phase-section"><div class="phase-header"><div class="phase-title">${m.phase.toUpperCase()}</div><div class="phase-line"></div></div>`;
+        lastPhase=m.phase;
+      }
+      html+=koCard(m, uid);
+    });
+    if(lastPhase) html+=`</div>`;
     html+=champPicksBlock(uid);
   } else {
     const sorted=MATCHES.filter(m=>!m.isKO&&!closed.includes(m.id)).sort((a,b)=>{
@@ -2958,14 +2975,22 @@ function renderNextMatches(){
       return new Date(`${ma.date||'9999'}T${ma.time||'00:00'}`)-new Date(`${mb.date||'9999'}T${mb.time||'00:00'}`);
     });
     sorted.forEach(m=>{ html+=matchCard(m, bets, uid); });
-    KO_PHASES.forEach(phase=>{
-      const kms=MATCHES.filter(m=>m.phase===phase&&!closed.includes(m.id));
-      if(!kms.length) return;
-      html+=`<div class="phase-section">`;
-      html+=`<div class="phase-header"><div class="phase-title">${phase.toUpperCase()}</div><div class="phase-line"></div></div>`;
-      kms.forEach(m=>{ html+=koCard(m, uid); });
-      html+=`</div>`;
+    const koSortedChrono=MATCHES.filter(m=>m.isKO&&!closed.includes(m.id)).sort((a,b)=>{
+      const ma=getMeta(a),mb=getMeta(b);
+      const da=ma.date&&ma.time?new Date(`${ma.date}T${ma.time}:00`):new Date('9999-01-01');
+      const db=mb.date&&mb.time?new Date(`${mb.date}T${mb.time}:00`):new Date('9999-01-01');
+      return da-db;
     });
+    let lastPhaseChrono='';
+    koSortedChrono.forEach(m=>{
+      if(m.phase!==lastPhaseChrono){
+        if(lastPhaseChrono) html+=`</div>`;
+        html+=`<div class="phase-section"><div class="phase-header"><div class="phase-title">${m.phase.toUpperCase()}</div><div class="phase-line"></div></div>`;
+        lastPhaseChrono=m.phase;
+      }
+      html+=koCard(m, uid);
+    });
+    if(lastPhaseChrono) html+=`</div>`;
   }
 
   el.innerHTML=html;
