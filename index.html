@@ -1083,7 +1083,8 @@ function isLocked(m){
 // Get scoring multiplier for a match round
 function roundScore(m, baseKey){
   if(!m.isKO) return S.scoring[baseKey];
-  const roundMap={r32:'r32',r16:'r16',qf:'qf',sf:'sf',tp:'tp',final:'f'};
+  if(m.round==='r32') return 0; // Segunda Fase: no slot points
+  const roundMap={r16:'r16',qf:'qf',sf:'sf',tp:'tp',final:'f'};
   const roundPts=roundMap[m.round];
   return roundPts ? S.scoring[roundPts] : S.scoring[baseKey];
 }
